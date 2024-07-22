@@ -1,5 +1,5 @@
 ---
-name: 'Issue: create issue template'
+name: Create issue template
 about: Use this template when issue causes
 title: "[TAG] Issue Name"
 labels: ''
