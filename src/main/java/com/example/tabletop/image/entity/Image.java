@@ -1,6 +1,4 @@
-package com.example.tabletop.image.entity.copy;
-
-import java.time.LocalDateTime;
+package com.example.tabletop.image.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -21,26 +19,25 @@ public class Image {
 	
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "image_id")
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "parent_id", nullable = false)
     private Long parentId;
 
-    @Column(nullable = false)
+    @Column(name = "parent_type", nullable = false)
     @Enumerated(EnumType.ORDINAL)
     private ParentType parentType;
 
-    @Column(nullable = false)
+    // UUID 포함
+    @Column(name = "filename", nullable = false)
     private String filename;
 
-    @Column(nullable = false)
+    @Column(name = "file_original_name", nullable = false)
     private String fileOriginalName;
     
-    @Column(nullable = false)
+    @Column(name = "filepath", nullable = false)
     private String filepath;
-
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
 
     public enum ParentType {
         STORE,
