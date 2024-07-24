@@ -1,5 +1,6 @@
 package com.example.tabletop.order.dto;
 
+import com.example.tabletop.payment.dto.PaymentResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -12,5 +13,5 @@ public class OrderResponseDto {
     private Integer waitingNumber;
     private Integer totalPrice;
     private LocalDateTime createdAt;
-
+    private PaymentResponseDto payment;
 }

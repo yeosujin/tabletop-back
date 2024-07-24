@@ -9,12 +9,19 @@ import com.example.tabletop.order.repository.OrderRepository;
 import com.example.tabletop.orderitem.dto.OrderItemRequestDto;
 import com.example.tabletop.orderitem.entity.Orderitem;
 import com.example.tabletop.orderitem.repository.OrderitemRepository;
+import com.example.tabletop.payment.dto.PaymentRequestDto;
+import com.example.tabletop.payment.dto.PaymentResponseDto;
+import com.example.tabletop.payment.entity.Payment;
+import com.example.tabletop.payment.entity.PaymentMethod;
+import com.example.tabletop.payment.repository.PaymentMethodRepository;
+import com.example.tabletop.payment.repository.PaymentRepository;
 import com.example.tabletop.store.entity.Store;
 import com.example.tabletop.store.repository.StoreRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Service
@@ -24,6 +31,8 @@ public class OrderService {
     private final StoreRepository storeRepository;
     private final MenuRepository menuRepository;
     private final OrderitemRepository orderItemRepository;
+    private final PaymentMethodRepository paymentMethodRepository;
+    private final PaymentRepository paymentRepository;
 
     public OrderResponseDto createOrder(CreateOrderRequest orderRequestDto) {
         Store store = storeRepository.findById(orderRequestDto.getStoreId())
@@ -60,7 +69,34 @@ public class OrderService {
             orderItemRepository.save(orderItem);
         }
 
-        return new OrderResponseDto(order.getOrderId(), order.getWaitingNumber(),
-                order.getTotalPrice(), order.getCreatedAt());
+        // Create payment
+        Payment payment = createPayment(orderRequestDto.getPayment(), order, BigDecimal.valueOf(totalPrice));
+
+    return new OrderResponseDto(
+        order.getOrderId(),
+        order.getWaitingNumber(),
+        order.getTotalPrice(),
+        order.getCreatedAt(),
+        new PaymentResponseDto(
+            payment.getId(),
+            payment.getPaymentMethod().getMethod(),
+            payment.getAmount(),
+            payment.getTransactionId()));
+    }
+
+    private Payment createPayment(PaymentRequestDto paymentRequestDto, Order order, BigDecimal amount) {
+        PaymentMethod paymentMethod = paymentMethodRepository.findById(paymentRequestDto.getPaymentMethodId())
+                .orElseThrow(() -> new EntityNotFoundException("Payment method not found"));
+
+        Payment payment = new Payment();
+        payment.setPaymentMethod(paymentMethod);
+        payment.setOrder(order);
+        payment.setAmount(amount);
+        payment.setIsRefunded(false);
+        payment.setTransactionId(paymentRequestDto.getTransactionId());
+        payment.setCreatedAt(LocalDateTime.now());
+        payment.setUpdatedAt(LocalDateTime.now());
+
+        return paymentRepository.save(payment);
     }
 }

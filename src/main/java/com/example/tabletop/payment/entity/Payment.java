@@ -4,12 +4,14 @@ import com.example.tabletop.order.entity.Order;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
+@Setter
 @Getter
 @ToString
 @NoArgsConstructor
