@@ -1,41 +1,47 @@
 package com.example.tabletop.seller.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "seller")
 @Getter
-@ToString
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@ToString
 public class Seller {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "seller_id", nullable = false)
-    private Long sellerId;
+    @Column(name = "seller_id")
+    private Long id;
 
-    @Column(name = "login_id", length = 30)
+    @Column(name = "login_id", nullable = false, length = 30, unique = true)
     private String loginId;
 
-    @Column(name = "username", length = 30)
+    @Column(name = "username", nullable = false, length = 30)
     private String username;
 
-    @Column(name = "password")
+    @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "email", length = 50)
+    @Column(name = "email", nullable = false, length = 50)
     private String email;
 
     @Column(name = "mobile", length = 14)
     private String mobile;
 
-    @Column(name = "created_at")
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
     @Column(name = "refresh_token")
@@ -43,4 +49,5 @@ public class Seller {
 
     @Column(name = "done_click_count_setting")
     private Boolean doneClickCountSetting;
+
 }

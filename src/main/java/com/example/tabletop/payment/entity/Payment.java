@@ -1,6 +1,7 @@
 package com.example.tabletop.payment.entity;
 
 import com.example.tabletop.order.entity.Order;
+import com.example.tabletop.payment.enums.PaymentMethod;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,13 +17,13 @@ import java.time.LocalDateTime;
 @ToString
 @NoArgsConstructor
 public class Payment {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "payment_id")
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "paymentmethod_id", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_method", nullable = false)
     private PaymentMethod paymentMethod;
 
     @OneToOne
@@ -38,7 +39,7 @@ public class Payment {
     @Column(name = "transaction_id", length = 30)
     private String transactionId;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
