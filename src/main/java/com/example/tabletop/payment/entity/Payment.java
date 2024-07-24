@@ -1,5 +1,6 @@
 package com.example.tabletop.payment.entity;
 
+import com.example.tabletop.order.entity.Order;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,8 +20,12 @@ public class Payment {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "paymentmethod_id")
+    @JoinColumn(name = "paymentmethod_id", nullable = false)
     private PaymentMethod paymentMethod;
+
+    @OneToOne
+    @JoinColumn(name = "order_id")
+    private Order order;
 
     @Column(name = "amount")
     private BigDecimal amount;
@@ -36,7 +41,4 @@ public class Payment {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    @Column(name = "order_id")
-    private Long orderId;
 }
