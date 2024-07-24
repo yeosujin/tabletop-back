@@ -1,10 +1,5 @@
 package com.example.tabletop.image.service;
 
-<<<<<<< Updated upstream
-public class ImageService {
-
-}
-=======
 import com.example.tabletop.image.entity.Image;
 import com.example.tabletop.image.repository.ImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,4 +72,4 @@ public class ImageService {
         return Files.readAllBytes(filepath);
     }
 }
->>>>>>> Stashed changes
+
