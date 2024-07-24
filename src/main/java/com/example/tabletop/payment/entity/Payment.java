@@ -1,5 +1,42 @@
 package com.example.tabletop.payment.entity;
 
-public class Payment {
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Entity
+@Getter
+@ToString
+@NoArgsConstructor
+public class Payment {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "payment_id")
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "paymentmethod_id")
+    private PaymentMethod paymentMethod;
+
+    @Column(name = "amount")
+    private BigDecimal amount;
+
+    @Column(name = "is_refunded")
+    private Boolean isRefunded;
+
+    @Column(name = "transaction_id", length = 30)
+    private String transactionId;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @Column(name = "order_id")
+    private Long orderId;
 }
