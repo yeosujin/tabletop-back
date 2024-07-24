@@ -1,10 +1,13 @@
 package com.example.tabletop.order.dto;
 
+import com.example.tabletop.orderitem.dto.OrderItemRequestDto;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class CreateOrderRequest {
     private Long storeId;
     private Integer tableNumber;
-    private Integer totalPrice;
+    private List<OrderItemRequestDto> orderItems;
 }

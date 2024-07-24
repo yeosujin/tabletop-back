@@ -1,5 +1,9 @@
 package com.example.tabletop.orderitem.service;
 
-public class OrderitemService {
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
+@Service
+@RequiredArgsConstructor
+public class OrderitemService {
 }
