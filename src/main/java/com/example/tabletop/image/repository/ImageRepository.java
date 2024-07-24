@@ -1,10 +1,5 @@
 package com.example.tabletop.image.repository;
 
-<<<<<<< Updated upstream
-public class ImageRepository {
-
-}
-=======
 import com.example.tabletop.image.entity.Image;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -17,4 +12,3 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
     List<Image> findByParentIdAndParentType(Long parentId, Image.ParentType parentType);
 
 }
->>>>>>> Stashed changes
