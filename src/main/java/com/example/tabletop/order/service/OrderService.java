@@ -12,8 +12,7 @@ import com.example.tabletop.orderitem.repository.OrderitemRepository;
 import com.example.tabletop.payment.dto.PaymentRequestDto;
 import com.example.tabletop.payment.dto.PaymentResponseDto;
 import com.example.tabletop.payment.entity.Payment;
-import com.example.tabletop.payment.entity.PaymentMethod;
-import com.example.tabletop.payment.repository.PaymentMethodRepository;
+import com.example.tabletop.payment.enums.PaymentMethod;
 import com.example.tabletop.payment.repository.PaymentRepository;
 import com.example.tabletop.store.entity.Store;
 import com.example.tabletop.store.repository.StoreRepository;
@@ -31,7 +30,6 @@ public class OrderService {
     private final StoreRepository storeRepository;
     private final MenuRepository menuRepository;
     private final OrderitemRepository orderItemRepository;
-    private final PaymentMethodRepository paymentMethodRepository;
     private final PaymentRepository paymentRepository;
 
     public OrderResponseDto createOrder(CreateOrderRequest orderRequestDto) {
@@ -79,17 +77,14 @@ public class OrderService {
         order.getCreatedAt(),
         new PaymentResponseDto(
             payment.getId(),
-            payment.getPaymentMethod().getMethod(),
+            payment.getPaymentMethod().name(),
             payment.getAmount(),
             payment.getTransactionId()));
     }
 
     private Payment createPayment(PaymentRequestDto paymentRequestDto, Order order, BigDecimal amount) {
-        PaymentMethod paymentMethod = paymentMethodRepository.findById(paymentRequestDto.getPaymentMethodId())
-                .orElseThrow(() -> new EntityNotFoundException("Payment method not found"));
-
         Payment payment = new Payment();
-        payment.setPaymentMethod(paymentMethod);
+        payment.setPaymentMethod(PaymentMethod.valueOf(paymentRequestDto.getPaymentMethod()));
         payment.setOrder(order);
         payment.setAmount(amount);
         payment.setIsRefunded(false);
