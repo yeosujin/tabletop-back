@@ -1,19 +1,21 @@
 package com.example.tabletop.image.service;
 
-import com.example.tabletop.image.entity.Image;
-import com.example.tabletop.image.repository.ImageRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.example.tabletop.image.entity.Image;
+import com.example.tabletop.image.enums.ImageParentType;
+import com.example.tabletop.image.repository.ImageRepository;
 
 @Service
 public class ImageService {
@@ -28,7 +30,7 @@ public class ImageService {
     }
 
     @Transactional
-    public Image saveImage(MultipartFile file, Long parentId, Image.ParentType parentType) throws IOException {
+    public Image saveImage(MultipartFile file, Long parentId, ImageParentType parentType) throws IOException {
         String filename = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
         Path filepath = Paths.get(uploadDir, filename);
 
@@ -53,7 +55,7 @@ public class ImageService {
     }
 
     @Transactional(readOnly = true)
-    public List<Image> getImagesByParent(Long parentId, Image.ParentType parentType) {
+    public List<Image> getImagesByParent(Long parentId, ImageParentType parentType) {
         return imageRepository.findByParentIdAndParentType(parentId, parentType);
     }
 
