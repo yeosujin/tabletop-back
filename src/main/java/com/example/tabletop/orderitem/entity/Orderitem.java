@@ -5,9 +5,11 @@ import com.example.tabletop.order.entity.Order;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 @Entity
+@Setter
 @Getter
 @ToString
 @NoArgsConstructor

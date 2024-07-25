@@ -42,7 +42,7 @@ public class MenuService {
             return menuRepository.findMenusForInfiniteScroll(storeId, lastMenuId, pageable);
         }
     }
-    
+
     @Transactional(readOnly = true)
     public List<Menu> getMenusByStoreId(Long storeId) {
         return menuRepository.findByStore_StoreId(storeId);
