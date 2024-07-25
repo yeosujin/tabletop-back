@@ -1,6 +1,12 @@
 package com.example.tabletop.store.controller;
 
+<<<<<<< Updated upstream
 import java.util.List;
+=======
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+>>>>>>> Stashed changes
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -28,8 +34,13 @@ public class StoreController {
 	
 	// 가게 목록 조회
 	@GetMapping("api/stores/{login_id}")
+<<<<<<< Updated upstream
 	public ResponseEntity<?> getStoreListByUsername(@PathVariable String login_id) {
 		List<StoreListResponseDTO> storeList = storeService.getStoreListByLoginId(login_id);
+=======
+	public ResponseEntity<?> getStoreListByUsername(@PathVariable String loginId) {
+		List<StoreListResponseDTO> storeList = storeService.getStoreListByLoginId(loginId);
+>>>>>>> Stashed changes
 		
 		try {
 			return new ResponseEntity<List<StoreListResponseDTO>>(storeList, HttpStatus.OK);			
@@ -38,6 +49,23 @@ public class StoreController {
 		}
 	}
 	
+<<<<<<< Updated upstream
+=======
+	// 사업자등록번호 중복 확인
+	@GetMapping("/api/store/{corporate_registration_number}")
+	public ResponseEntity<Map<String, String>> checkCorporateRegistrationNumberDuplication(@PathVariable String corporateRegistrationNumber) {
+		Map<String, String> result = new HashMap<>();
+		
+		if(storeService.checkCorporateRegistrationNumberDuplication(corporateRegistrationNumber)) {
+			result.put("isDuplicated", "true");
+			return new ResponseEntity<>(result, HttpStatus.OK);
+		} else {
+			result.put("isDuplicated", "false");
+			return new ResponseEntity<>(result, HttpStatus.OK);
+		}
+	}
+	
+>>>>>>> Stashed changes
 	// 가게 삭제
 	@DeleteMapping("api/stores/{store_id}")
     public ResponseEntity<?> deleteStoreByStoreId(@PathVariable Long storeId, @RequestParam String password) {
