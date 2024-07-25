@@ -9,25 +9,20 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED) // JPA를 위한 기본 생성자, 외부에서 직접 사용 방지
 @Getter
 @ToString
 @Entity
 public class Image {
-	
-	@Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-<<<<<<< Updated upstream
-	@Column(name = "image_id")
-    private Long id;
-=======
     @Column(name = "image_id")
     private Long imageId;
->>>>>>> Stashed changes
 
     @Column(name = "parent_id", nullable = false)
     private Long parentId;
@@ -36,7 +31,6 @@ public class Image {
     @Enumerated(EnumType.ORDINAL)
     private ImageParentType parentType;
 
-    // UUID 포함
     @Column(name = "filename", nullable = false)
     private String filename;
 
@@ -46,13 +40,6 @@ public class Image {
     @Column(name = "filepath", nullable = false)
     private String filepath;
 
-<<<<<<< Updated upstream
-    public enum ParentType {
-        STORE,
-        MENU
-    }
-}
-=======
     // 모든 필드를 초기화하는 생성자
     public Image(Long parentId, ImageParentType parentType, String filename, String fileOriginalName, String filepath) {
         this.parentId = parentId;
@@ -61,5 +48,5 @@ public class Image {
         this.fileOriginalName = fileOriginalName;
         this.filepath = filepath;
     }
+
 }
->>>>>>> Stashed changes
