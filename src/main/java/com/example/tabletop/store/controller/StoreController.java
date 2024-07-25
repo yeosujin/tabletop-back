@@ -1,12 +1,8 @@
 package com.example.tabletop.store.controller;
 
-<<<<<<< Updated upstream
-import java.util.List;
-=======
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
->>>>>>> Stashed changes
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -34,23 +30,16 @@ public class StoreController {
 	
 	// 가게 목록 조회
 	@GetMapping("api/stores/{login_id}")
-<<<<<<< Updated upstream
-	public ResponseEntity<?> getStoreListByUsername(@PathVariable String login_id) {
-		List<StoreListResponseDTO> storeList = storeService.getStoreListByLoginId(login_id);
-=======
 	public ResponseEntity<?> getStoreListByUsername(@PathVariable String loginId) {
 		List<StoreListResponseDTO> storeList = storeService.getStoreListByLoginId(loginId);
->>>>>>> Stashed changes
-		
+
 		try {
 			return new ResponseEntity<List<StoreListResponseDTO>>(storeList, HttpStatus.OK);			
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred");  // HTTP 500 Internal Server Error
 		}
 	}
-	
-<<<<<<< Updated upstream
-=======
+
 	// 사업자등록번호 중복 확인
 	@GetMapping("/api/store/{corporate_registration_number}")
 	public ResponseEntity<Map<String, String>> checkCorporateRegistrationNumberDuplication(@PathVariable String corporateRegistrationNumber) {
@@ -65,7 +54,6 @@ public class StoreController {
 		}
 	}
 	
->>>>>>> Stashed changes
 	// 가게 삭제
 	@DeleteMapping("api/stores/{store_id}")
     public ResponseEntity<?> deleteStoreByStoreId(@PathVariable Long storeId, @RequestParam String password) {
