@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
 
-import com.example.tabletop.seller.service.SellerService;
 import com.example.tabletop.store.dto.StoreDetailsDTO;
 import com.example.tabletop.store.dto.StoreListResponseDTO;
 import com.example.tabletop.store.entity.Store;
@@ -20,11 +19,11 @@ public class StoreService {
 	String savePath;
 	
 	private final StoreRepository storeRepository;
-	private final SellerService sellerService;
+//	private final SellerService sellerService;
 	
 	public StoreService(StoreRepository storeRepository) {
 		this.storeRepository = storeRepository;
-		this.sellerService = new SellerService();
+//		this.sellerService = sellerService;
 	}
 	
 	// loginId에 해당하는 모든 가게 조회
