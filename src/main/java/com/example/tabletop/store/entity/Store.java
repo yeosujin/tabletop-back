@@ -39,6 +39,7 @@ import lombok.ToString;
 
 @NoArgsConstructor
 @Getter
+@Table(name = "store")
 @ToString
 @Entity
 @EntityListeners(AuditingEntityListener.class)
@@ -142,6 +143,5 @@ public class Store {
 		this.holidays = holidays;
     }
     
-    
-	
 }
+
