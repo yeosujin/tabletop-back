@@ -17,23 +17,7 @@ import com.example.tabletop.seller.entity.Seller;
 import com.example.tabletop.store.enums.Day;
 import com.example.tabletop.store.enums.StoreType;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
-
+import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -59,15 +43,12 @@ public class Store {
     @Enumerated(EnumType.ORDINAL)
     private StoreType storeType;
 
-    // nullable은 true이나 storetype에 따른 검증 로직 필요
     @Column(name = "corporate_registration_number", nullable = true, unique = true)
     private String corporateRegistrationNumber;
     
-    // nullable은 true이나 storetype에 따른 검증 로직 필요
     @Column(name = "open_date", nullable = true)
     private LocalDate openDate;
     
-    // nullable은 true이나 storetype에 따른 검증 로직 필요
     @Column(name = "close_date", nullable = true)
     private LocalDate closeDate;
     
@@ -86,7 +67,6 @@ public class Store {
     @Column(name = "close_time", nullable = false)
     private LocalTime closeTime;
     
-    // 휴무일은 없거나 여러 개일 수 있음
     @ElementCollection(targetClass = Day.class)
     @CollectionTable(name = "holiday", joinColumns = @JoinColumn(name = "holiday_id"))
     @Enumerated(EnumType.ORDINAL)
@@ -106,7 +86,8 @@ public class Store {
 	@ToString.Exclude
 	private Seller seller;
     
-    @OneToOne(mappedBy = "store", cascade = CascadeType.REMOVE)
+    @OneToOne
+    @JoinColumn(name = "image_id")
     private Image image;
     
     @OneToMany(mappedBy = "store", cascade = CascadeType.REMOVE)
@@ -134,7 +115,6 @@ public class Store {
 		this.seller = seller;
 	}
     
-    // 가게 수정
     public void updateDetails(String name, String description, String address, String notice, LocalTime openTime,
 			LocalTime closeTime, Set<Day> holidays) {
     	this.name = name;
@@ -146,5 +126,7 @@ public class Store {
 		this.holidays = holidays;
     }
     
+    public void setImage(Image image) {
+        this.image = image;
+    }
 }
-
