@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.tabletop.image.entity.Image;
+import com.example.tabletop.image.enums.ImageParentType;
 import com.example.tabletop.image.service.ImageService;
 import com.example.tabletop.menu.entity.Menu;
 import com.example.tabletop.menu.repository.MenuRepository;
@@ -62,7 +63,7 @@ public class MenuService {
                 .build();
 
         if (imageFile != null && !imageFile.isEmpty()) {
-            Image image = imageService.saveImage(imageFile, storeId, Image.ParentType.MENU);
+            Image image = imageService.saveImage(imageFile, storeId, ImageParentType.MENU);
             menu.setImage(image);
         }
 
@@ -81,9 +82,9 @@ public class MenuService {
 
         if (imageFile != null && !imageFile.isEmpty()) {
             if (menu.getImage() != null) {
-                imageService.deleteImage(menu.getImage().getId());
+                imageService.deleteImage(menu.getImage().getImageId());
             }
-            Image newImage = imageService.saveImage(imageFile, menu.getStore().getStoreId(), Image.ParentType.MENU);
+            Image newImage = imageService.saveImage(imageFile, menu.getStore().getStoreId(), ImageParentType.MENU);
             menu.setImage(newImage);
         }
 
@@ -96,7 +97,7 @@ public class MenuService {
                 .orElseThrow(() -> new NoSuchElementException("Menu not found with id: " + menuId));
 
         if (menu.getImage() != null) {
-            imageService.deleteImage(menu.getImage().getId());
+            imageService.deleteImage(menu.getImage().getImageId());
         }
 
         menuRepository.delete(menu);

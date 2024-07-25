@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import com.example.tabletop.store.dto.StoreDetailsDTO;
 import com.example.tabletop.store.dto.StoreListResponseDTO;
@@ -13,7 +14,10 @@ import com.example.tabletop.store.repository.StoreRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
+@Service
+@RequiredArgsConstructor
 public class StoreService {
 	@Value("${store.files.save.path}")
 	String savePath;
@@ -21,10 +25,6 @@ public class StoreService {
 	private final StoreRepository storeRepository;
 //	private final SellerService sellerService;
 	
-	public StoreService(StoreRepository storeRepository) {
-		this.storeRepository = storeRepository;
-//		this.sellerService = sellerService;
-	}
 	
 	// loginId에 해당하는 모든 가게 조회
 	public List<StoreListResponseDTO> getStoreListByLoginId(String loginId) {
