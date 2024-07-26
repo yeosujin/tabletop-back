@@ -19,7 +19,6 @@ public class SellerController {
 	
 	private final SellerService sellerService;
 	
-	// 회원가입
 	@PostMapping("/signup")
     public ResponseEntity<Void> signUp(@RequestBody SellerDTO sellerDto) {
         sellerService.signUp(sellerDto);
