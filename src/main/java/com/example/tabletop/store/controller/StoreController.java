@@ -11,10 +11,15 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.example.tabletop.store.dto.StoreDetailsDTO;
 import com.example.tabletop.store.dto.StoreListResponseDTO;
+import com.example.tabletop.store.enums.StoreType;
 import com.example.tabletop.store.service.StoreService;
 
 import lombok.RequiredArgsConstructor;
@@ -28,7 +33,7 @@ public class StoreController {
 	
 	private final StoreService storeService;
 	
-	// 가게 목록 조회
+	// 로그인한 판매자의 가게 목록 조회
 	@GetMapping("api/stores/{login_id}")
 	public ResponseEntity<?> getStoreListByUsername(@PathVariable String loginId) {
 		List<StoreListResponseDTO> storeList = storeService.getStoreListByLoginId(loginId);
@@ -41,7 +46,7 @@ public class StoreController {
 	}
 
 	// 사업자등록번호 중복 확인
-	@GetMapping("/api/store/{corporate_registration_number}")
+	@GetMapping("/api/dupalicationCheck/{corporate_registration_number}")
 	public ResponseEntity<Map<String, String>> checkCorporateRegistrationNumberDuplication(@PathVariable String corporateRegistrationNumber) {
 		Map<String, String> result = new HashMap<>();
 		
@@ -52,6 +57,43 @@ public class StoreController {
 			result.put("isDuplicated", "false");
 			return new ResponseEntity<>(result, HttpStatus.OK);
 		}
+	}
+	
+	// 가게 등록
+	@PostMapping("api/store/{login_id}")
+	public void insertStore(@PathVariable String loginId,
+							@RequestParam String name,
+							@RequestParam String storeType,
+							@RequestParam(required = false) String corporateRegistrationNumber,
+							@RequestParam(required = false) String openDate,
+							@RequestParam(required = false) String closeDate,
+				            @RequestParam String description,
+				            @RequestParam String address,
+				            @RequestParam String notice,
+				            @RequestParam String openTime,
+				            @RequestParam String closeTime,
+				            @RequestParam String holidays,
+				            @RequestParam(required = false) MultipartFile image) {
+		
+		storeService.insertStore(loginId, name, storeType, corporateRegistrationNumber, openDate, closeDate,
+	            					description, address, notice, openTime, closeTime, holidays, image);
+		
+	}
+	
+	// 가게 수정
+	@PutMapping("api/stores/{store_id}")
+	public void updateStoreByStoreId(@PathVariable Long storeId,
+									@RequestParam String name,
+						            @RequestParam String description,
+						            @RequestParam String address,
+						            @RequestParam String notice,
+						            @RequestParam String openTime,
+						            @RequestParam String closeTime,
+						            @RequestParam String holidays,
+						            @RequestParam(required = false) MultipartFile image) {
+		
+		storeService.updateStoreByStoreId(storeId, name, description, address, notice, openTime, closeTime, holidays, image);
+		
 	}
 	
 	// 가게 삭제

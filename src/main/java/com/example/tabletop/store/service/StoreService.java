@@ -1,15 +1,23 @@
 package com.example.tabletop.store.service;
 
 import java.io.File;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.example.tabletop.seller.entity.Seller;
+import com.example.tabletop.seller.repository.SellerRepository;
 import com.example.tabletop.store.dto.StoreDetailsDTO;
 import com.example.tabletop.store.dto.StoreListResponseDTO;
 import com.example.tabletop.store.entity.Store;
+import com.example.tabletop.store.enums.StoreType;
 import com.example.tabletop.store.repository.StoreRepository;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -23,6 +31,7 @@ public class StoreService {
 	String savePath;
 	
 	private final StoreRepository storeRepository;
+	private final SellerRepository sellerRepository;
 //	private final SellerService sellerService;
 	
 	
@@ -35,34 +44,123 @@ public class StoreService {
 				.collect(Collectors.toList());
 	}
 	
-	// 가게 등록
-	public void insertStore(StoreDetailsDTO storeDetailsDTO) {
-		storeRepository.save(StoreDetailsDTOToEntity(storeDetailsDTO));
-		
-		// 이미지 추가 구현 필요
-	}
-	
 	// 사업자등록번호 중복 확인
 	public boolean checkCorporateRegistrationNumberDuplication(String corporateRegistrationNumber) {
 		return storeRepository.existsByCorporateRegistrationNumber(corporateRegistrationNumber);
 	}
 	
+	// loginId로 판매자를 조회하여 그 판매자에게 가게 등록
+	public void insertStore(String loginId, 
+							String name,
+							String storeType,
+							String corporateRegistrationNumber,
+							String openDate,
+							String closeDate,
+							String description,
+							String address,
+							String notice,
+							String openTime,
+							String closeTime,
+							String holidays,
+							MultipartFile image) {
+		
+		// 로그인 사용자 찾기
+		Seller seller = sellerRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new EntityNotFoundException("Seller not found with login_id: " + loginId));
+		
+		// 날짜, 시간 변환(String -> LocalDateTime)
+		LocalTime parsedOpenTime = null;
+        LocalTime parsedCloseTime = null;
+        LocalDate parsedOpenDate = null;
+        LocalDate parsedCloseDate = null;
+		
+		try {
+            parsedOpenTime = LocalTime.parse(openTime, DateTimeFormatter.ISO_LOCAL_TIME);
+            parsedCloseTime = LocalTime.parse(closeTime, DateTimeFormatter.ISO_LOCAL_TIME);
+            parsedOpenDate = LocalDate.parse(openDate, DateTimeFormatter.ISO_LOCAL_DATE);
+            parsedCloseDate = LocalDate.parse(closeDate, DateTimeFormatter.ISO_LOCAL_DATE);
+        } catch (DateTimeParseException e) {
+            System.out.println("Invalid format: " + parsedOpenTime);
+            System.out.println("Invalid format: " + parsedCloseTime);
+            System.out.println("Invalid format: " + parsedOpenDate);
+            System.out.println("Invalid format: " + parsedCloseDate);
+        }
+		
+		// dto 객체 생성
+		StoreDetailsDTO dto = null;
+		
+		if(storeType.equals(StoreType.ORDINARY.getName())) {
+			dto = StoreDetailsDTO.builder()
+								.name(name)
+								.storeType(StoreType.ORDINARY)
+								.corporateRegistrationNumber(corporateRegistrationNumber)
+								.description(description)
+								.address(address)
+								.notice(notice)
+								.openTime(parsedOpenTime)
+								.closeTime(parsedCloseTime)
+								.holidays(null)
+								.seller(seller)
+								.build();
+		} else if(storeType.equals(StoreType.TEMPORARY.getName())) {
+			dto = StoreDetailsDTO.builder()
+								.name(name)
+								.storeType(StoreType.TEMPORARY)
+								.openDate(null)
+								.closeDate(null)
+								.description(description)
+								.address(address)
+								.notice(notice)
+								.openTime(parsedOpenTime)
+								.closeTime(parsedCloseTime)
+								.holidays(null)
+								.seller(seller)
+								.build();
+		}
+
+		// 이미지 추가 구현 필요
+		
+		storeRepository.save(StoreDetailsDTOToEntity(dto));
+	}
+	
 	// 가게 수정
 	@Transactional
-	public void updateStoreByStoreId(Long storeId, StoreDetailsDTO storeDetailsDTO) {
+	public void updateStoreByStoreId(Long storeId,
+									String name,
+									String description,
+									String address,
+									String notice,
+									String openTime,
+									String closeTime,
+									String holidays,
+									MultipartFile image) {
+		
+		// 시간 변환(String -> LocalTime)
+		LocalTime parsedOpenTime = null;
+        LocalTime parsedCloseTime = null;
+		
+		try {
+            parsedOpenTime = LocalTime.parse(openTime, DateTimeFormatter.ISO_LOCAL_TIME);
+            parsedCloseTime = LocalTime.parse(closeTime, DateTimeFormatter.ISO_LOCAL_TIME);
+        } catch (DateTimeParseException e) {
+            System.out.println("Invalid format: " + parsedOpenTime);
+            System.out.println("Invalid format: " + parsedCloseTime);
+        }
+		
+		// 가게 찾기
 		Store storeEntity = storeRepository.findById(storeId)
 			.orElseThrow(() -> new EntityNotFoundException("Store not found with id: " + storeId));
 		
-		storeEntity.updateDetails(
-								storeDetailsDTO.getName(),
-								storeDetailsDTO.getDescription(),
-								storeDetailsDTO.getAddress(),
-								storeDetailsDTO.getNotice(),
-								storeDetailsDTO.getOpenTime(),
-								storeDetailsDTO.getCloseTime(),
-								storeDetailsDTO.getHolidays());
+		storeEntity.updateDetails(name,
+								description,
+								address,
+								notice,
+								parsedOpenTime,
+								parsedCloseTime,
+								holidays);
 		
-		// 이미지 변경 구현 필요
+		// 이미지 변경 구현 필요, 삭제되어 없거나 바뀌었거나
+		storeEntity.setImage(null);
 		
 		storeRepository.save(storeEntity);
 	}
