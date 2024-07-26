@@ -18,8 +18,17 @@ jobs:
         distribution: 'adopt'
         
     - name: Build with Maven
-      run: mvn clean package -DskipTests
+      run: mvn clean package -DskipTests --batch-mode --quiet
         
+    - name: Create directory on EC2
+      env:
+        PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
+        HOST: ${{ secrets.EC2_HOST }}
+        USER: ${{ secrets.EC2_USERNAME }}
+      run: |
+        echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+        ssh -o StrictHostKeyChecking=no -i private_key ${USER}@${HOST} 'mkdir -p ~/app'
+
     - name: Copy JAR to EC2
       env:
         PRIVATE_KEY: ${{ secrets.EC2_PRIVATE_KEY }}
