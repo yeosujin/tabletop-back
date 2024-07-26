@@ -20,17 +20,19 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class JwtTokenFilter extends OncePerRequestFilter {
+public class JwtTokenFilter extends OncePerRequestFilter { 
+	// 토큰 검증을 2번의 과정을 거침. 
+	// 1, 서명키가 유효한지 검증 
+	// 2. 토큰 안에 저장되어 있는 로그인 id를 꺼내서 해당 id를 loadUserByUsername를 통해 db에 로그인id가 존재하는지 검증
 	private final JwtTokenProvider jwtTokenProvider;
 	private final CustomUserDetailsService customUserDetailsService;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 		String accessToken = getTokenFromRequest(request);
-
 		if (accessToken != null && jwtTokenProvider.validateToken(accessToken)) {
 			UsernamePasswordAuthenticationToken authentication = getAuthenticationFromToken(accessToken);
-			
+			System.out.println("정상 실행");
 			authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 		}

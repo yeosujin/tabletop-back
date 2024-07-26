@@ -58,7 +58,7 @@ public class JwtTokenProvider {
         try {
             Jwts
             	.parserBuilder()
-            	.setSigningKey(getSigningKey())
+            	.setSigningKey(getSigningKey()) // 서명키로 검증
             	.build()
             	.parseClaimsJws(token);
             return true;
