@@ -151,13 +151,13 @@ public class StoreService {
 		Store storeEntity = storeRepository.findById(storeId)
 			.orElseThrow(() -> new EntityNotFoundException("Store not found with id: " + storeId));
 		
-		storeEntity.updateDetails(name,
-								description,
-								address,
-								notice,
-								parsedOpenTime,
-								parsedCloseTime,
-								holidays);
+//		storeEntity.updateDetails(name,
+//								description,
+//								address,
+//								notice,
+//								parsedOpenTime,
+//								parsedCloseTime,
+//								holidays);
 		
 		// 이미지 변경 구현 필요, 삭제되어 없거나 바뀌었거나
 		storeEntity.setImage(null);

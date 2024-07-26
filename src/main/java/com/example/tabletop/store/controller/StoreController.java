@@ -17,9 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.example.tabletop.store.dto.StoreDetailsDTO;
 import com.example.tabletop.store.dto.StoreListResponseDTO;
-import com.example.tabletop.store.enums.StoreType;
 import com.example.tabletop.store.service.StoreService;
 
 import lombok.RequiredArgsConstructor;
@@ -51,7 +49,7 @@ public class StoreController {
 
 		Map<String, String> result = new HashMap<>();
 		
-		if(storeService.checkCorporateRegistrationNumberDuplication(corporate_registration_number)) {
+		if(storeService.checkCorporateRegistrationNumberDuplication(corporateRegistrationNumber)) {
 			result.put("isDuplicated", "true");
 			return new ResponseEntity<>(result, HttpStatus.OK);
 		} else {
