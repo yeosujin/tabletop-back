@@ -1,5 +1,6 @@
 package com.example.tabletop.order.service;
 
+import com.example.tabletop.commons.sse.service.SseService;
 import com.example.tabletop.menu.entity.Menu;
 import com.example.tabletop.menu.repository.MenuRepository;
 import com.example.tabletop.order.dto.CreateOrderRequest;
@@ -18,12 +19,16 @@ import com.example.tabletop.store.entity.Store;
 import com.example.tabletop.store.repository.StoreRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.concurrent.CompletableFuture;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class OrderService {
     private final OrderRepository orderRepository;
@@ -32,6 +37,9 @@ public class OrderService {
     private final OrderitemRepository orderItemRepository;
     private final PaymentRepository paymentRepository;
 
+    private final SseService sseService;
+
+    @Transactional
     public OrderResponseDto createOrder(CreateOrderRequest orderRequestDto) {
         Store store = storeRepository.findById(orderRequestDto.getStoreId())
                 .orElseThrow(() -> new EntityNotFoundException("Store not found"));
@@ -52,14 +60,14 @@ public class OrderService {
         int waitingNumber = orderRepository.countTodayOrdersByStoreId(store.getStoreId()) + 1;
         order.setWaitingNumber(waitingNumber);
 
-        order = orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
 
         for (OrderItemRequestDto itemDto : orderRequestDto.getOrderItems()) {
             Menu menu = menuRepository.findById(itemDto.getMenuId())
                     .orElseThrow(() -> new EntityNotFoundException("Menu not found"));
 
             Orderitem orderItem = new Orderitem();
-            orderItem.setOrder(order);
+            orderItem.setOrder(savedOrder);
             orderItem.setMenu(menu);
             orderItem.setQuantity(itemDto.getQuantity());
             orderItem.setPrice(itemDto.getPrice());
@@ -67,19 +75,26 @@ public class OrderService {
             orderItemRepository.save(orderItem);
         }
 
-        // Create payment
-        Payment payment = createPayment(orderRequestDto.getPayment(), order, BigDecimal.valueOf(totalPrice));
+        Payment payment = createPayment(orderRequestDto.getPayment(), savedOrder, BigDecimal.valueOf(totalPrice));
 
-    return new OrderResponseDto(
-        order.getOrderId(),
-        order.getWaitingNumber(),
-        order.getTotalPrice(),
-        order.getCreatedAt(),
-        new PaymentResponseDto(
-            payment.getId(),
-            payment.getPaymentMethod().name(),
-            payment.getAmount(),
-            payment.getTransactionId()));
+        CompletableFuture.runAsync(() -> {
+            try {
+                sseService.notifyNewOrder(store.getStoreId(), savedOrder);
+            } catch (Exception e) {
+                log.error("Failed to send SSE notification for order: " + savedOrder.getOrderId(), e);
+            }
+        });
+
+        return new OrderResponseDto(
+                savedOrder.getOrderId(),
+                savedOrder.getWaitingNumber(),
+                savedOrder.getTotalPrice(),
+                savedOrder.getCreatedAt(),
+                new PaymentResponseDto(
+                        payment.getId(),
+                        payment.getPaymentMethod().name(),
+                        payment.getAmount(),
+                        payment.getTransactionId()));
     }
 
     private Payment createPayment(PaymentRequestDto paymentRequestDto, Order order, BigDecimal amount) {
