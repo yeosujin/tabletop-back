@@ -48,9 +48,10 @@ public class StoreController {
 	// 사업자등록번호 중복 확인
 	@GetMapping("/api/dupalicationCheck/{corporate_registration_number}")
 	public ResponseEntity<Map<String, String>> checkCorporateRegistrationNumberDuplication(@PathVariable String corporateRegistrationNumber) {
+
 		Map<String, String> result = new HashMap<>();
 		
-		if(storeService.checkCorporateRegistrationNumberDuplication(corporateRegistrationNumber)) {
+		if(storeService.checkCorporateRegistrationNumberDuplication(corporate_registration_number)) {
 			result.put("isDuplicated", "true");
 			return new ResponseEntity<>(result, HttpStatus.OK);
 		} else {
@@ -98,10 +99,9 @@ public class StoreController {
 	
 	// 가게 삭제
 	@DeleteMapping("api/stores/{store_id}")
-    public ResponseEntity<?> deleteStoreByStoreId(@PathVariable Long storeId, @RequestParam String password) {
-        
+    public ResponseEntity<?> deleteStoreByStoreId(@PathVariable Long store_id, @RequestParam String password) {
         try {
-        	storeService.deleteStoreByStoreId(storeId, password);
+        	storeService.deleteStoreByStoreId(store_id, password);
             return ResponseEntity.ok().build();  // HTTP 200 OK
         } catch (AccessDeniedException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid password");  // HTTP 403 Forbidden

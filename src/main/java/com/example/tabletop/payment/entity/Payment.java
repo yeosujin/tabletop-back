@@ -1,17 +1,18 @@
 package com.example.tabletop.payment.entity;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
 import com.example.tabletop.order.entity.Order;
 import com.example.tabletop.payment.enums.PaymentMethod;
-
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 @Entity
+@Setter
 @Getter
 @ToString
 @NoArgsConstructor

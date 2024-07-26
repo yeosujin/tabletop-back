@@ -1,5 +1,7 @@
 package com.example.tabletop.image.entity;
 
+import com.example.tabletop.image.enums.ImageParentType;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -20,14 +22,14 @@ public class Image {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "image_id")
-    private Long id;
+    private Long imageId;
 
     @Column(name = "parent_id", nullable = false)
     private Long parentId;
 
     @Column(name = "parent_type", nullable = false)
     @Enumerated(EnumType.ORDINAL)
-    private ParentType parentType;
+    private ImageParentType parentType;
 
     @Column(name = "filename", nullable = false)
     private String filename;
@@ -38,17 +40,13 @@ public class Image {
     @Column(name = "filepath", nullable = false)
     private String filepath;
 
-    public enum ParentType {
-        STORE,
-        MENU
-    }
-
     // 모든 필드를 초기화하는 생성자
-    public Image(Long parentId, ParentType parentType, String filename, String fileOriginalName, String filepath) {
+    public Image(Long parentId, ImageParentType parentType, String filename, String fileOriginalName, String filepath) {
         this.parentId = parentId;
         this.parentType = parentType;
         this.filename = filename;
         this.fileOriginalName = fileOriginalName;
         this.filepath = filepath;
     }
+
 }

@@ -4,13 +4,15 @@ import com.example.tabletop.store.entity.Store;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
 
 @Entity
+@Setter
 @Getter
-@ToString
+@ToString(exclude = "store")
 @NoArgsConstructor
 @Table(name = "orders")
 public class Order {
