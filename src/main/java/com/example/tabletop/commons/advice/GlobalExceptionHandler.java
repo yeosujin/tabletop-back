@@ -10,10 +10,18 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 
+import com.example.tabletop.auth.exception.CertificationGenerationException;
+import com.example.tabletop.auth.exception.CustomMessagingException;
+import com.example.tabletop.auth.exception.InvalidPasswordException;
+import com.example.tabletop.auth.exception.LogoutException;
+import com.example.tabletop.auth.exception.RefreshTokenException;
 import com.example.tabletop.image.exception.ImageNotFoundException;
 import com.example.tabletop.image.exception.ImageProcessingException;
 import com.example.tabletop.menu.exception.InvalidMenuDataException;
 import com.example.tabletop.menu.exception.MenuNotFoundException;
+import com.example.tabletop.seller.exception.DuplicateLoginIdException;
+import com.example.tabletop.seller.exception.InvalidSellerDataException;
+import com.example.tabletop.seller.exception.SellerNotFoundException;
 import com.example.tabletop.store.exception.StoreNotFoundException;
 
 @ControllerAdvice
@@ -65,6 +73,54 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleIOException(IOException ex, WebRequest request) {
         ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), "Error processing file: " + ex.getMessage(), request.getDescription(false));
         return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    
+    @ExceptionHandler(DuplicateLoginIdException.class)
+    public ResponseEntity<?> handleDuplicateLoginIdException(DuplicateLoginIdException ex, WebRequest request) {
+        ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), ex.getMessage(), request.getDescription(false));
+        return new ResponseEntity<>(errorDetails, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(InvalidSellerDataException.class)
+    public ResponseEntity<?> handleInvalidSellerDataException(InvalidSellerDataException ex, WebRequest request) {
+        ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), ex.getMessage(), request.getDescription(false));
+        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(SellerNotFoundException.class)
+    public ResponseEntity<?> handleSellerNotFoundException(SellerNotFoundException ex, WebRequest request) {
+        ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), ex.getMessage(), request.getDescription(false));
+        return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(CertificationGenerationException.class)
+    public ResponseEntity<?> handleCertificationGenerationException(CertificationGenerationException ex, WebRequest request) {
+        ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), ex.getMessage(), request.getDescription(false));
+        return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(CustomMessagingException.class)
+    public ResponseEntity<?> handleCustomMessagingException(CustomMessagingException ex, WebRequest request) {
+        ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), ex.getMessage(), request.getDescription(false));
+        return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(InvalidPasswordException.class)
+    public ResponseEntity<?> handleInvalidPasswordException(InvalidPasswordException ex, WebRequest request) {
+        ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), ex.getMessage(), request.getDescription(false));
+        return new ResponseEntity<>(errorDetails, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(LogoutException.class)
+    public ResponseEntity<?> handleLogoutException(LogoutException ex, WebRequest request) {
+        ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), ex.getMessage(), request.getDescription(false));
+        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(RefreshTokenException.class)
+    public ResponseEntity<?> handleRefreshTokenException(RefreshTokenException ex, WebRequest request) {
+        ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), ex.getMessage(), request.getDescription(false));
+        return new ResponseEntity<>(errorDetails, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(Exception.class)

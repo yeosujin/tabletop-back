@@ -8,6 +8,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import com.example.tabletop.image.entity.Image;
 import com.example.tabletop.store.entity.Store;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -59,11 +60,11 @@ public class Menu {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE) // 판매자 삭제을 위한 remove 적용
     @JoinColumn(name = "store_id", nullable = false)
     private Store store;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE) // 판매자 삭제을 위한 remove 적용
     @JoinColumn(name = "image_id")
     private Image image;
 }

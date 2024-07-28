@@ -32,7 +32,7 @@ public class StoreController {
 	private final StoreService storeService;
 	
 	// 로그인한 판매자의 가게 목록 조회
-	@GetMapping("api/stores/{login_id}")
+	@GetMapping("api/stores/{loginId}")
 	public ResponseEntity<?> getStoreListByUsername(@PathVariable String loginId) {
 		List<StoreListResponseDTO> storeList = storeService.getStoreListByLoginId(loginId);
 
@@ -44,7 +44,7 @@ public class StoreController {
 	}
 
 	// 사업자등록번호 중복 확인
-	@GetMapping("/api/dupalicationCheck/{corporate_registration_number}")
+	@GetMapping("/api/dupalicationCheck/{corporateRegistrationNumber}")
 	public ResponseEntity<Map<String, String>> checkCorporateRegistrationNumberDuplication(@PathVariable String corporateRegistrationNumber) {
 
 		Map<String, String> result = new HashMap<>();
@@ -58,6 +58,7 @@ public class StoreController {
 		}
 	}
 	
+	// 이 부분부터 다시 post main 테스트 하기
 	// 가게 등록
 	@PostMapping("api/store/{login_id}")
 	public void insertStore(@PathVariable String loginId,
