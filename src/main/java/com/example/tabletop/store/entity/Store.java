@@ -6,6 +6,8 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -17,7 +19,22 @@ import com.example.tabletop.seller.entity.Seller;
 import com.example.tabletop.store.enums.Day;
 import com.example.tabletop.store.enums.StoreType;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -69,11 +86,8 @@ public class Store {
     @Column(name = "close_time", nullable = false)
     private LocalTime closeTime;
     
-    @ElementCollection(targetClass = Day.class)
-    @CollectionTable(name = "holiday", joinColumns = @JoinColumn(name = "holiday_id"))
-    @Enumerated(EnumType.ORDINAL)
-    @Column(name = "day", nullable = true)
-    private Set<Day> holidays;
+    @Column(name = "holidays", nullable = true)
+    private Set<String> holidays;
     
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -101,7 +115,7 @@ public class Store {
     @Builder
 	public Store(Long storeId, String name, StoreType storeType, String corporateRegistrationNumber, LocalDate openDate,
 			LocalDate closeDate, String description, String address, String notice, LocalTime openTime,
-			LocalTime closeTime, Set<Day> holidays, LocalDateTime createdAt, LocalDateTime updatedAt, Seller seller) {
+			LocalTime closeTime, Set<String> holidays, LocalDateTime createdAt, LocalDateTime updatedAt, Seller seller) {
 		this.storeId = storeId;
 		this.name = name;
 		this.storeType = storeType;
@@ -118,7 +132,7 @@ public class Store {
 	}
     
     public void updateDetails(String name, String description, String address, String notice, LocalTime openTime,
-			LocalTime closeTime, Set<Day> holidays) {
+			LocalTime closeTime, Set<String> holidays) {
     	this.name = name;
 		this.description = description;
 		this.address = address;
