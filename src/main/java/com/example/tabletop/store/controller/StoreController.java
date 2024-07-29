@@ -38,7 +38,7 @@ public class StoreController {
 	private final StoreService storeService;
 	
 	// 로그인한 판매자의 가게 목록 조회
-	@GetMapping("api/stores/{login_id}")
+	@GetMapping("api/stores/{loginId}")
 	public ResponseEntity<?> getStoreListByUsername(@PathVariable String loginId) {
 		List<StoreListResponseDTO> storeList = storeService.getStoreListByLoginId(loginId);
 

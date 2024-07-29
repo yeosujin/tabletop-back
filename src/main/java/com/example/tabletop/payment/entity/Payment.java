@@ -26,7 +26,7 @@ public class Payment {
     @Column(name = "payment_method", nullable = false)
     private PaymentMethod paymentMethod;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.REMOVE) // 판매자 삭제을 위한 remove 적용
     @JoinColumn(name = "order_id")
     private Order order;
 

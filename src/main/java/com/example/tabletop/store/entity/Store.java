@@ -102,7 +102,7 @@ public class Store {
 	@ToString.Exclude
 	private Seller seller;
     
-    @OneToOne
+    @OneToOne(cascade = CascadeType.REMOVE) // 판매자 삭제을 위한 remove 적용
     @JoinColumn(name = "image_id")
     private Image image;
     
