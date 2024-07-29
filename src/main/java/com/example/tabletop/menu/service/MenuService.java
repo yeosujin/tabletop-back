@@ -16,26 +16,24 @@ import com.example.tabletop.image.service.ImageService;
 import com.example.tabletop.menu.entity.Menu;
 import com.example.tabletop.menu.exception.MenuNotFoundException;
 import com.example.tabletop.menu.repository.MenuRepository;
+import com.example.tabletop.orderitem.repository.OrderitemRepository;
+import com.example.tabletop.orderitem.service.OrderitemService;
 import com.example.tabletop.store.entity.Store;
 import com.example.tabletop.store.exception.StoreNotFoundException;
 import com.example.tabletop.store.repository.StoreRepository;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class MenuService {
 
     private final MenuRepository menuRepository;
     private final StoreRepository storeRepository;
     private final ImageService imageService;
-
-    @Autowired
-    public MenuService(MenuRepository menuRepository, StoreRepository storeRepository, ImageService imageService) {
-        this.menuRepository = menuRepository;
-        this.storeRepository = storeRepository;
-        this.imageService = imageService;
-    }
+    private final OrderitemRepository orderitemRepository;
 
     @Transactional(readOnly = true)
     public List<Menu> getMenusForInfiniteScroll(Long storeId, Long lastMenuId, int limit) {
@@ -132,7 +130,10 @@ public class MenuService {
         if (menu.getImage() != null) {
             imageService.deleteImage(menu.getImage().getImageId());
         }
-
+        
+        // order items 있다면 null 전환
+        orderitemRepository.nullifyMenuReference(menu.getId());
+        
         // 메뉴만 삭제
         menuRepository.delete(menu);
 
