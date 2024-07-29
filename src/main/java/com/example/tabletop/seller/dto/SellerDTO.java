@@ -24,15 +24,15 @@ public class SellerDTO {
     private String refreshToken;
     private Boolean doneClickCountSetting;
     
-    public Seller toEntity() {
+    public static Seller toEntity(SellerDTO sellerDTO) {
         return Seller.builder()
-                .loginId(this.loginId)
-                .username(this.username)
-                .password(this.password)
-                .email(this.email)
-                .mobile(this.mobile)
-                .refreshToken(this.refreshToken)
-                .doneClickCountSetting(this.doneClickCountSetting)
+                .loginId(sellerDTO.getLoginId())
+                .username(sellerDTO.getUsername())
+                .password(sellerDTO.getPassword())
+                .email(sellerDTO.getEmail())
+                .mobile(sellerDTO.getMobile())
+                .refreshToken(sellerDTO.getRefreshToken())
+                .doneClickCountSetting(sellerDTO.getDoneClickCountSetting())
                 .build();
     }
 }

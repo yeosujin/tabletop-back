@@ -36,7 +36,9 @@ public class WebSecurityConfig {
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 
                 .authorizeHttpRequests((request) -> request
-                        .requestMatchers("/api/sellers/signup", "/api/auth/login").permitAll()
+                        .requestMatchers("/api/sellers/signup", "/api/sellers/exists").permitAll()
+                        .requestMatchers("/api/auth/login", "/api/auth/{loginId}", "/api/auth/token/refresh").permitAll()
+                        .requestMatchers("/api/mail/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 
@@ -45,6 +47,11 @@ public class WebSecurityConfig {
                 .build();
     }
 
+    /*
+		AuthenticationManager
+	      - 인증 처리를 해준다
+          - 실제론 AuthenticationManager 인터페이스가 ProviderManager 에게 인증을 위임하는 것
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();

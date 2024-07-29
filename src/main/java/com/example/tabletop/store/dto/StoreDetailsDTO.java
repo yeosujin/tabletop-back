@@ -5,7 +5,6 @@ import java.time.LocalTime;
 import java.util.Set;
 
 import com.example.tabletop.seller.entity.Seller;
-import com.example.tabletop.store.enums.Day;
 import com.example.tabletop.store.enums.StoreType;
 
 import lombok.Builder;
@@ -25,13 +24,13 @@ public class StoreDetailsDTO {
     private String notice;
     private LocalTime openTime;
     private LocalTime closeTime;
-    private Set<Day> holidays;
-	private Seller seller;
+    private Set<String> holidays;
+	private String sellerName;
     
     @Builder
     public StoreDetailsDTO(Long storeId, String name, StoreType storeType, String corporateRegistrationNumber,
     		LocalDate openDate, LocalDate closeDate, String description, String address, String notice,
-    		LocalTime openTime, LocalTime closeTime, Set<Day> holidays, Seller seller) {
+    		LocalTime openTime, LocalTime closeTime, Set<String> holidays, String sellerName) {
     	super();
     	this.storeId = storeId;
     	this.name = name;
@@ -45,7 +44,7 @@ public class StoreDetailsDTO {
     	this.openTime = openTime;
     	this.closeTime = closeTime;
     	this.holidays = holidays;
-    	this.seller = seller;
+    	this.sellerName = sellerName;
     }
     
 }
