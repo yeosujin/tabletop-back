@@ -1,4 +1,4 @@
-package com.example.tabletop.menu.controller;
+package com.example.tabletop.order.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
