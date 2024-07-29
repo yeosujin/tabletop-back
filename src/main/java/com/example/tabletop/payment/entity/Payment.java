@@ -1,17 +1,18 @@
 package com.example.tabletop.payment.entity;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
 import com.example.tabletop.order.entity.Order;
 import com.example.tabletop.payment.enums.PaymentMethod;
-
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 @Entity
+@Setter
 @Getter
 @ToString
 @NoArgsConstructor
@@ -25,7 +26,7 @@ public class Payment {
     @Column(name = "payment_method", nullable = false)
     private PaymentMethod paymentMethod;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.REMOVE) // 판매자 삭제을 위한 remove 적용
     @JoinColumn(name = "order_id")
     private Order order;
 
