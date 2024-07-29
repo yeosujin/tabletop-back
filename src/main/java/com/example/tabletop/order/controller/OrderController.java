@@ -3,6 +3,7 @@ package com.example.tabletop.order.controller;
 import com.example.tabletop.order.dto.CreateOrderRequest;
 import com.example.tabletop.order.dto.KitchenOrderResponseDto;
 import com.example.tabletop.order.dto.OrderResponseDto;
+import com.example.tabletop.order.entity.Order;
 import com.example.tabletop.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -31,4 +32,15 @@ public class OrderController {
         );
     }
 
+    @PutMapping("/{orderId}/cancel")
+    public ResponseEntity<Order> cancelOrder(@PathVariable Long orderId) {
+        Order canceledOrder = orderService.updateOrderStatus(orderId, 2);
+        return ResponseEntity.ok(canceledOrder);
+    }
+
+    @PutMapping("/{orderId}/complete")
+    public ResponseEntity<Order> completeOrder(@PathVariable Long orderId) {
+        Order completedOrder = orderService.updateOrderStatus(orderId, 1);
+        return ResponseEntity.ok(completedOrder);
+    }
 }

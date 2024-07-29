@@ -121,4 +121,15 @@ public class OrderService {
         }).toList();
 
     }
+
+    @Transactional
+    public Order updateOrderStatus(Long orderId, Integer status) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("Order not found with id: " + orderId));
+
+        order.setStatus(status);
+        order.setUpdatedAt(LocalDateTime.now());
+
+        return orderRepository.save(order);
+    }
 }
