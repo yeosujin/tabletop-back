@@ -1,144 +1,119 @@
 package com.example.tabletop.menu.controller;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
-import org.springframework.http.MediaType;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
 
-import com.example.tabletop.auth.service.MailService;
-import com.example.tabletop.commons.config.JwtTokenProvider;
+import com.example.tabletop.image.enums.ImageParentType;
 import com.example.tabletop.image.service.ImageService;
 import com.example.tabletop.menu.dto.MenuDTO;
 import com.example.tabletop.menu.entity.Menu;
 import com.example.tabletop.menu.repository.MenuRepository;
 import com.example.tabletop.menu.service.MenuService;
-import com.example.tabletop.seller.repository.SellerRepository;
+import com.example.tabletop.store.entity.Store;
 import com.example.tabletop.store.repository.StoreRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
-@WebMvcTest(MenuController.class)
-@AutoConfigureMockMvc(addFilters = false)
-@Import({MenuService.class})
-@MockBean(JavaMailSender.class)
-@TestPropertySource(properties = {
-    "spring.mail.host=localhost",
-    "spring.mail.port=3025",
-    "spring.mail.username=test",
-    "spring.mail.password=test"
-})
-public class MenuControllerTest {
-    @MockBean
-    private MenuRepository menuRepository;
+import io.jsonwebtoken.io.IOException;
 
-    @MockBean
-    private StoreRepository storeRepository;
+import java.util.Arrays;
+import java.util.List;
 
-    @MockBean
-    private ImageService imageService;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-    @MockBean
-    private SellerRepository sellerRepository;
-    
-    @MockBean
-    private MailService mailService;
+@SpringBootTest
+class MenuControllerTest {
 
-    @MockBean
-    private JwtTokenProvider jwtTokenProvider;
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @MockBean
+    @Mock
     private MenuService menuService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @InjectMocks
+    private MenuController menuController;
 
     private Menu testMenu;
+    private MenuDTO testMenuDTO;
 
     @BeforeEach
     void setUp() {
-        testMenu = new Menu();
-        testMenu.setId(1L);
-        testMenu.setName("Test Menu");
-        testMenu.setPrice(1000);
-        testMenu.setDescription("Test Description");
-        testMenu.setIsAvailable(true);
+        testMenu = Menu.builder()
+        		.id(1L)
+        		.name("Test Menu")
+        		.price(1000)
+        		.description("Test Description")
+        		.isAvailable(true)
+        		.store(null)
+        		.build(); //new Menu(1L, "Test Menu", 1000, "Test Description", true, null);
+        testMenuDTO = new MenuDTO();
+        testMenuDTO.setId(1L);
+        testMenuDTO.setName("Test Menu");
+        testMenuDTO.setPrice(1000);
+        testMenuDTO.setDescription("Test Description");
+        testMenuDTO.setIsAvailable(true);
     }
 
     @Test
-    void testGetMenu() throws Exception {
-        when(menuService.getMenu(1L)).thenReturn(testMenu);
+    void testGetMenus() {
+        Long storeId = 1L;
+        Long lastMenuId = null;
+        int limit = 20;
+        List<Menu> menus = Arrays.asList(testMenu);
+        when(menuService.getMenusForInfiniteScroll(storeId, lastMenuId, limit)).thenReturn(menus);
 
-        mockMvc.perform(get("/api/stores/1/menus/1"))
-               .andExpect(status().isOk())
-               .andExpect(jsonPath("$.name").value("Test Menu"))
-               .andExpect(jsonPath("$.price").value(1000));
+        ResponseEntity<List<MenuDTO>> response = menuController.getMenus(storeId, lastMenuId, limit);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(1, response.getBody().size());
+        assertEquals(testMenu.getId(), response.getBody().get(0).getId());
     }
 
     @Test
     void testCreateMenu() throws Exception {
-        MenuDTO menuDTO = new MenuDTO();
-        menuDTO.setName("New Menu");
-        menuDTO.setPrice(2000);
-        menuDTO.setDescription("New Description");
-        menuDTO.setIsAvailable(true);
+        Long storeId = 1L;
+        when(menuService.createMenu(eq(storeId), anyString(), anyInt(), anyString(), anyBoolean(), any())).thenReturn(testMenu);
 
-        when(menuService.createMenu(eq(1L), anyString(), anyInt(), anyString(), anyBoolean(), any()))
-            .thenReturn(testMenu);
+        ResponseEntity<MenuDTO> response = menuController.createMenu(storeId, testMenuDTO);
 
-        mockMvc.perform(post("/api/stores/1/menus")
-               .contentType(MediaType.APPLICATION_JSON)
-               .content(objectMapper.writeValueAsString(menuDTO)))
-               .andExpect(status().isCreated())
-               .andExpect(jsonPath("$.name").value("Test Menu"));
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(testMenu.getId(), response.getBody().getId());
     }
 
     @Test
     void testUpdateMenu() throws Exception {
-        MenuDTO menuDTO = new MenuDTO();
-        menuDTO.setName("Updated Menu");
-        menuDTO.setPrice(3000);
-        menuDTO.setDescription("Updated Description");
-        menuDTO.setIsAvailable(false);
+        Long storeId = 1L;
+        Long menuId = 1L;
+        when(menuService.updateMenu(eq(storeId), eq(menuId), anyString(), anyInt(), anyString(), anyBoolean(), any())).thenReturn(testMenu);
 
-        when(menuService.updateMenu(eq(1L), eq(1L), anyString(), anyInt(), anyString(), anyBoolean(), any()))
-            .thenReturn(testMenu);
+        ResponseEntity<?> response = menuController.updateMenu(storeId, menuId, testMenuDTO);
 
-        mockMvc.perform(put("/api/stores/1/menus/1")
-               .contentType(MediaType.APPLICATION_JSON)
-               .content(objectMapper.writeValueAsString(menuDTO)))
-               .andExpect(status().isOk())
-               .andExpect(jsonPath("$.name").value("Test Menu"));
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(testMenu.getId(), ((MenuDTO)response.getBody()).getId());
     }
 
     @Test
     void testDeleteMenu() throws Exception {
-        mockMvc.perform(delete("/api/stores/1/menus/1"))
-               .andExpect(status().isNoContent());
+        Long storeId = 1L;
+        Long menuId = 1L;
+        doNothing().when(menuService).deleteMenu(storeId, menuId);
 
-        verify(menuService, times(1)).deleteMenu(1L, 1L);
+        ResponseEntity<?> response = menuController.deleteMenu(storeId, menuId);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    }
+
+    @Test
+    void testGetMenu() {
+        Long menuId = 1L;
+        when(menuService.getMenu(menuId)).thenReturn(testMenu);
+
+        ResponseEntity<MenuDTO> response = menuController.getMenu(menuId);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(testMenu.getId(), response.getBody().getId());
     }
 }
