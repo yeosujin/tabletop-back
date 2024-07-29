@@ -6,8 +6,8 @@ import java.util.NoSuchElementException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
 import com.example.tabletop.auth.exception.CertificationGenerationException;
@@ -24,7 +24,7 @@ import com.example.tabletop.seller.exception.InvalidSellerDataException;
 import com.example.tabletop.seller.exception.SellerNotFoundException;
 import com.example.tabletop.store.exception.StoreNotFoundException;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(StoreNotFoundException.class)
