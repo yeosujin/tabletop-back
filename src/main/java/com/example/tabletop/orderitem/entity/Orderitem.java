@@ -1,5 +1,8 @@
 package com.example.tabletop.orderitem.entity;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.example.tabletop.menu.entity.Menu;
 import com.example.tabletop.order.entity.Order;
 import jakarta.persistence.*;
@@ -25,8 +28,9 @@ public class Orderitem {
     @Column(name = "price")
     private Integer price;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE) // 판매자 삭제을 위한 remove 적용
-    @JoinColumn(name = "menu_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "menu_id", nullable = true)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private Menu menu;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE) // 판매자 삭제을 위한 remove 적용
