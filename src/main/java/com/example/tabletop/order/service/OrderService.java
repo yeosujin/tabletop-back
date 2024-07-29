@@ -116,7 +116,7 @@ public class OrderService {
         return orders.stream().map(order -> {
             List<Orderitem> orderitems = orderItemRepository.findByOrder_OrderId(order.getOrderId());
             return new KitchenOrderResponseDto(order.getOrderId(), order.getWaitingNumber(), order.getTotalPrice(),
-                    orderitems.stream().map(orderitem -> new KitchenOrderResponseDto.KitchenOrderItemDto(orderitem.getMenu().getName(), orderitem.getQuantity(), orderitem.getPrice())).toList(),
+                    orderitems.stream().map(orderitem -> new KitchenOrderResponseDto.KitchenOrderItemDto(orderitem.getMenu() != null ? orderitem.getMenu().getName() : "Unknown Menu", orderitem.getQuantity(), orderitem.getPrice())).toList(),
                     order.getCreatedAt(), order.getStatus());
         }).toList();
 
