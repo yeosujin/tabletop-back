@@ -9,6 +9,7 @@ import com.example.tabletop.order.dto.OrderResponseDto;
 import com.example.tabletop.order.entity.Order;
 import com.example.tabletop.order.repository.OrderRepository;
 import com.example.tabletop.orderitem.dto.OrderItemRequestDto;
+import com.example.tabletop.orderitem.dto.OrderItemResponseDto;
 import com.example.tabletop.orderitem.entity.Orderitem;
 import com.example.tabletop.orderitem.repository.OrderitemRepository;
 import com.example.tabletop.payment.dto.PaymentRequestDto;
@@ -82,12 +83,17 @@ public class OrderService {
 
         createPayment(orderRequestDto.getPayment(), savedOrder, BigDecimal.valueOf(totalPrice));
 
-        return new OrderResponseDto(
-                savedOrder.getOrderId(),
-                savedOrder.getWaitingNumber(),
-                savedOrder.getTotalPrice(),
-                orderItems.stream().map(item -> new OrderItemRequestDto(item.getMenu().getId(), item.getQuantity(), item.getPrice())).toList()
-        );
+    return new OrderResponseDto(
+        savedOrder.getOrderId(),
+        savedOrder.getWaitingNumber(),
+        savedOrder.getTotalPrice(),
+        orderItems.stream()
+            .map(
+                item ->
+                    new OrderItemResponseDto(
+                        item.getMenu().getName(), item.getQuantity(), item.getPrice()))
+            .toList(),
+            savedOrder.getCreatedAt());
     }
 
     private void createPayment(PaymentRequestDto paymentRequestDto, Order order, BigDecimal amount) {

@@ -3,6 +3,7 @@ package com.example.tabletop.order.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -12,6 +13,7 @@ public class KitchenOrderResponseDto {
     private Integer waitingNumber;
     private Integer totalPrice;
     private List<KitchenOrderItemDto> orderItems;
+    private LocalDateTime createdAt;
 
     @Data
     @AllArgsConstructor
