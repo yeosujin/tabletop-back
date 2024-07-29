@@ -8,7 +8,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 import com.example.tabletop.image.entity.Image;
 import com.example.tabletop.store.entity.Store;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
