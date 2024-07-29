@@ -60,7 +60,7 @@ public class StoreController {
 		} else {
 			result.put("isDuplicated", "false");
 		}
-		
+
 		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
 	
@@ -70,27 +70,27 @@ public class StoreController {
 												@RequestPart("storeData") StoreRequestDTO storeRequest,
 												@RequestPart(required = false) MultipartFile image) {
 		try {
-			storeService.insertStore(loginId, 
-									storeRequest.getName(), 
-									storeRequest.getStoreType(), 
-									storeRequest.getCorporateRegistrationNumber(), 
-									storeRequest.getOpenDate(), 
+			storeService.insertStore(loginId,
+									storeRequest.getName(),
+									storeRequest.getStoreType(),
+									storeRequest.getCorporateRegistrationNumber(),
+									storeRequest.getOpenDate(),
 									storeRequest.getCloseDate(),
-									storeRequest.getDescription(), 
-									storeRequest.getAddress(), 
-									storeRequest.getNotice(), 
-									storeRequest.getOpenTime(), 
-									storeRequest.getCloseTime(), 
-									storeRequest.getHolidays(), 
+									storeRequest.getDescription(),
+									storeRequest.getAddress(),
+									storeRequest.getNotice(),
+									storeRequest.getOpenTime(),
+									storeRequest.getCloseTime(),
+									storeRequest.getHolidays(),
 									image);
-			
+
 			return ResponseEntity.status(HttpStatus.OK).body("등록 성공");
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred");
 		}
 		
 	}
-	
+
 	// 가게 상세 정보 조회
 	@GetMapping("api/stores/{storeId}/details")
 	public ResponseEntity<?> getStoreDetails(@PathVariable Long storeId) {
@@ -114,8 +114,8 @@ public class StoreController {
 											storeRequest.getDescription(),
 											storeRequest.getAddress(),
 											storeRequest.getNotice(),
-											storeRequest.getOpenTime(), 
-											storeRequest.getCloseTime(), 
+											storeRequest.getOpenTime(),
+											storeRequest.getCloseTime(),
 											storeRequest.getHolidays(),
 											image);
 
