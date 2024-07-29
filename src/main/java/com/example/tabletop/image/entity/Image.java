@@ -10,6 +10,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -41,6 +42,7 @@ public class Image {
     private String filepath;
 
     // 모든 필드를 초기화하는 생성자
+    @Builder
     public Image(Long parentId, ImageParentType parentType, String filename, String fileOriginalName, String filepath) {
         this.parentId = parentId;
         this.parentType = parentType;
