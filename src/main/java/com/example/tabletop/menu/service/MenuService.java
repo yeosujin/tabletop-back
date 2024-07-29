@@ -86,13 +86,19 @@ public class MenuService {
     }
 
     @Transactional
-    public Menu updateMenu(Long menuId, String name, Integer price, String description, Boolean isAvailable, MultipartFile imageFile) throws IOException {
-        log.info("Updating menu with id: {}", menuId);
+    public Menu updateMenu(Long storeId, Long menuId, String name, Integer price, String description, Boolean isAvailable, MultipartFile imageFile) throws IOException {
+        log.info("Updating menu with id: {} for store id: {}", menuId, storeId);
         Menu menu = menuRepository.findById(menuId)
                 .orElseThrow(() -> {
                     log.error("Menu not found with id: {}", menuId);
                     return new MenuNotFoundException("Menu not found with id: " + menuId);
                 });
+
+        // 메뉴가 해당 스토어에 속하는지 확인
+        if (!menu.getStore().getStoreId().equals(storeId)) {
+            log.error("Menu with id: {} does not belong to store with id: {}", menuId, storeId);
+            throw new IllegalArgumentException("Menu does not belong to the specified store");
+        }
 
         menu.setName(name);
         menu.setPrice(price);
@@ -103,30 +109,34 @@ public class MenuService {
             if (menu.getImage() != null) {
                 imageService.deleteImage(menu.getImage().getImageId());
             }
-            Image newImage = imageService.saveImage(imageFile, menu.getStore().getStoreId(), ImageParentType.MENU);
+            Image newImage = imageService.saveImage(imageFile, storeId, ImageParentType.MENU);
             menu.setImage(newImage);
         }
 
         Menu updatedMenu = menuRepository.save(menu);
-        log.info("Updated menu with id: {}", menuId);
+        log.info("Updated menu with id: {} for store id: {}", menuId, storeId);
         return updatedMenu;
     }
 
     @Transactional
-    public void deleteMenu(Long menuId) throws IOException {
-        log.info("Deleting menu with id: {}", menuId);
+    public void deleteMenu(Long storeId, Long menuId) throws IOException {
         Menu menu = menuRepository.findById(menuId)
-                .orElseThrow(() -> {
-                    log.error("Menu not found with id: {}", menuId);
-                    return new MenuNotFoundException("Menu not found with id: " + menuId);
-                });
+                .orElseThrow(() -> new MenuNotFoundException("Menu not found with id: " + menuId));
 
+        // 메뉴가 해당 스토어에 속하는지 확인
+        if (!menu.getStore().getStoreId().equals(storeId)) {
+            throw new IllegalArgumentException("Menu does not belong to the specified store");
+        }
+
+        // 이미지가 있다면 삭제
         if (menu.getImage() != null) {
             imageService.deleteImage(menu.getImage().getImageId());
         }
 
+        // 메뉴만 삭제
         menuRepository.delete(menu);
-        log.info("Deleted menu with id: {}", menuId);
+
+        log.info("Deleted menu with id: {} from store id: {}", menuId, storeId);
     }
 
     @Transactional(readOnly = true)
