@@ -93,7 +93,8 @@ public class OrderService {
                     new OrderItemResponseDto(
                         item.getMenu().getName(), item.getQuantity(), item.getPrice()))
             .toList(),
-            savedOrder.getCreatedAt());
+        savedOrder.getCreatedAt(),
+        savedOrder.getStatus());
     }
 
     private void createPayment(PaymentRequestDto paymentRequestDto, Order order, BigDecimal amount) {
@@ -107,5 +108,17 @@ public class OrderService {
         payment.setUpdatedAt(LocalDateTime.now());
 
          paymentRepository.save(payment);
+    }
+
+    public List<KitchenOrderResponseDto> readKitchenOrders(Long storeId) {
+        List<Order> orders = orderRepository.findByStore_StoreId(storeId);
+
+        return orders.stream().map(order -> {
+            List<Orderitem> orderitems = orderItemRepository.findByOrder_OrderId(order.getOrderId());
+            return new KitchenOrderResponseDto(order.getOrderId(), order.getWaitingNumber(), order.getTotalPrice(),
+                    orderitems.stream().map(orderitem -> new KitchenOrderResponseDto.KitchenOrderItemDto(orderitem.getMenu().getName(), orderitem.getQuantity(), orderitem.getPrice())).toList(),
+                    order.getCreatedAt(), order.getStatus());
+        }).toList();
+
     }
 }
