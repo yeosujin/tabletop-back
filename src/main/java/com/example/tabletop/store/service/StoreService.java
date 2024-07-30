@@ -22,14 +22,15 @@ import com.example.tabletop.seller.repository.SellerRepository;
 import com.example.tabletop.store.dto.StoreDetailsDTO;
 import com.example.tabletop.store.dto.StoreListResponseDTO;
 import com.example.tabletop.store.entity.Store;
-import com.example.tabletop.store.enums.Day;
 import com.example.tabletop.store.enums.StoreType;
 import com.example.tabletop.store.repository.StoreRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class StoreService {
@@ -200,15 +201,16 @@ public class StoreService {
 		storeRepository.save(storeEntity);
 	}
 	
-	// 가게 삭제(로그인된 판매자의 비밀번호와 일치해야 삭제 가능)
-	public void deleteStoreByStoreId(Long storeId, String password) {
+	// 가게 삭제
+	public void deleteStoreByStoreId(Long storeId) {
 		// 비밀번호 확인
-//		if (!userService.verifyPassword(userId, password)) {
-//			// throw new AccessDeniedException("Invalid password");
-//        }
+//		Authentication authentication = authenticationManager.authenticate(
+//				new UsernamePasswordAuthenticationToken(loginId, password));
 		
 		Store storeEntity = storeRepository.findById(storeId)
 				.orElseThrow(() -> new EntityNotFoundException("Store not found with id: " + storeId));
+		
+		log.info("StoreService<deleteStoreByStoreId> delete success");
 		
 		// 가게의 이미지파일 폴더 삭제(가게 이미지 + 메뉴 이미지)
 		String storeDir = savePath + File.separator + storeId.toString();
@@ -225,6 +227,8 @@ public class StoreService {
 
 		// store의 레코드 삭제 시, cascade로 image, menu, orders(?) 레코드 같이 삭제
 		storeRepository.delete(storeEntity);
+		log.info("StoreService<deleteStoreByStoreId> delete success");
+
 	}
 		
 	// Entity -> StoreListResponseDTO
