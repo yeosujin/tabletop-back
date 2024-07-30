@@ -12,7 +12,9 @@ import com.example.tabletop.auth.service.CustomUserDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
@@ -39,36 +41,28 @@ public class JwtTokenProvider {
 
         return Jwts.builder()
                 .setSubject(customUserDetails.getUsername())
-                .claim("user-id", customUserDetails.getSeller().getId())
-                .claim("user-email", customUserDetails.getSeller().getEmail())
+                .claim("seller-id", customUserDetails.getSeller().getId())
+                .claim("seller-username", customUserDetails.getSeller().getUsername())
+                .claim("seller-email", customUserDetails.getSeller().getEmail())
                 .setIssuedAt(new Date())
                 .setExpiration(expiryDate)
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 	
-	public String createRefreshToken() {
+	public String createRefreshToken(Authentication authentication) {
+		CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+        
         return Jwts.builder()
+                .setSubject(customUserDetails.getUsername())
+                .claim("seller-id", customUserDetails.getSeller().getId())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + refreshTokenValidity))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
-	
-	public boolean validateToken(String token) {
-        try {
-            Jwts
-            	.parserBuilder()
-            	.setSigningKey(getSigningKey()) // 서명키로 검증
-            	.build()
-            	.parseClaimsJws(token);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
 
-	public String getUsernameFromToken(String token) {
+	public String getUserLoginIdFromToken(String token) {
         try {
             Claims claims = Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
@@ -80,5 +74,18 @@ public class JwtTokenProvider {
         } catch (ExpiredJwtException e) {
             return e.getClaims().getSubject();
         }
+    }
+	
+	public boolean validateToken(String token) {
+        try {
+            Jwts
+            	.parserBuilder()
+            	.setSigningKey(getSigningKey()) // 서명키로 검증
+            	.build()
+            	.parseClaimsJws(token);
+            return true;
+        } catch (SecurityException | MalformedJwtException | ExpiredJwtException | UnsupportedJwtException | IllegalArgumentException ex) {
+        	return false;
+       }
     }
 }

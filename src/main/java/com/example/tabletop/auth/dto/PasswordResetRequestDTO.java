@@ -13,6 +13,6 @@ import lombok.ToString;
 @ToString
 public class PasswordResetRequestDTO {
 	private String loginId;
-    private String username;
+	private String email;
     private String mobile;
 }
