@@ -39,12 +39,12 @@ public class StoreService {
 	
 	private final StoreRepository storeRepository;
 	private final SellerRepository sellerRepository;
-//	private final SellerService sellerService;
 	private final ImageService imageService;
 	
 	
 	// loginId에 해당하는 모든 가게 조회
 	public List<StoreListResponseDTO> getStoreListByLoginId(String loginId) {
+		log.info("Fetching stores for login id: {}", loginId);
 		
 		return storeRepository.findAllBySeller_LoginId(loginId)
 				.stream()
@@ -54,6 +54,8 @@ public class StoreService {
 	
 	// 사업자등록번호 중복 확인
 	public boolean checkCorporateRegistrationNumberDuplication(String corporateRegistrationNumber) {
+		log.info("Checking corporate registration number duplication: {}", corporateRegistrationNumber);
+		
 		return storeRepository.existsByCorporateRegistrationNumber(corporateRegistrationNumber);
 	}
 	
@@ -71,10 +73,14 @@ public class StoreService {
 							String closeTime,
 							String[] holidays,
 							MultipartFile imageFile) {
-		
+		log.info("Creating new store for login id: {}", loginId);
+
 		// 로그인 사용자 찾기
 		Seller seller = sellerRepository.findByLoginId(loginId)
-                .orElseThrow(() -> new EntityNotFoundException("Seller not found with login_id: " + loginId));
+                .orElseThrow(() -> {
+                	log.error("Seller not found with login_id: {}", loginId);
+                	return new EntityNotFoundException("Seller not found with login_id: " + loginId);
+                });
 		
 		// 시간 변환(String -> LocalTime)
 		LocalTime parsedOpenTime = null;
@@ -138,6 +144,8 @@ public class StoreService {
 		// 이미지를 추가해야 하므로 바로 저장 필요
 		Store storeEntity = storeRepository.saveAndFlush(StoreDetailsDTOToEntity(dto, seller.getId()));
 		
+		log.info("Created new store with id: {} for login id: {}", storeEntity.getStoreId(), loginId);
+		
 		if (imageFile != null && !imageFile.isEmpty()) {
             Image image = imageService.saveImage(imageFile, storeEntity.getStoreId(), ImageParentType.STORE);
             storeEntity.setImage(image);
@@ -147,8 +155,12 @@ public class StoreService {
 	
 	// 가게 상세 정보 조회
 	public StoreDetailsDTO getStoreDetails(Long storeId) {
+		log.info("Fetching store with id: {}", storeId);
 		Store store = storeRepository.findById(storeId)
-				.orElseThrow(() -> new EntityNotFoundException("Store not found with id: " + storeId));
+				.orElseThrow(() -> {
+					log.error("Store not found with id: {}", storeId);
+					return new EntityNotFoundException("Store not found with id: " + storeId);
+				});
 		
 		return entityToStoreDetailsDTO(store);
 	}
@@ -164,6 +176,7 @@ public class StoreService {
 									String closeTime,
 									String[] holidays,
 									MultipartFile imageFile) {
+		log.info("Updating store with id: {} ", storeId);
 		
 		// 시간 변환(String -> LocalTime)
 		LocalTime parsedOpenTime = null;
@@ -182,7 +195,10 @@ public class StoreService {
 		
 		// 가게 찾기
 		Store storeEntity = storeRepository.findById(storeId)
-			.orElseThrow(() -> new EntityNotFoundException("Store not found with id: " + storeId));
+			.orElseThrow(() -> {
+				log.error("Store not found with id: {}", storeId);
+				return new EntityNotFoundException("Store not found with id: " + storeId);
+			});
 		
 		storeEntity.updateDetails(name,
 								description,
@@ -199,18 +215,18 @@ public class StoreService {
         }
 		
 		storeRepository.save(storeEntity);
+		log.info("Updated store with id: {}", storeId);
 	}
 	
 	// 가게 삭제
 	public void deleteStoreByStoreId(Long storeId) {
-		// 비밀번호 확인
-//		Authentication authentication = authenticationManager.authenticate(
-//				new UsernamePasswordAuthenticationToken(loginId, password));
+		log.info("Deleting store with id: {}", storeId);
 		
 		Store storeEntity = storeRepository.findById(storeId)
-				.orElseThrow(() -> new EntityNotFoundException("Store not found with id: " + storeId));
-		
-		log.info("StoreService<deleteStoreByStoreId> delete success");
+				.orElseThrow(() -> {
+					log.error("Store not found with id: {}", storeId);
+					return new EntityNotFoundException("Store not found with id: " + storeId);
+				});
 		
 		// 가게의 이미지파일 폴더 삭제(가게 이미지 + 메뉴 이미지)
 		String storeDir = savePath + File.separator + storeId.toString();
@@ -227,8 +243,8 @@ public class StoreService {
 
 		// store의 레코드 삭제 시, cascade로 image, menu, orders(?) 레코드 같이 삭제
 		storeRepository.delete(storeEntity);
-		log.info("StoreService<deleteStoreByStoreId> delete success");
-
+		
+		log.info("Deleted menu with id: {}", storeId);
 	}
 		
 	// Entity -> StoreListResponseDTO
