@@ -37,11 +37,13 @@ public class S3ImageService {
 	private final AmazonS3 amazonS3;
 	private final ImageRepository ImageRepository;
 	
-  @Value("${cloud.aws.s3.bucket}")
-  private String bucketName;
-   private final String DIR_NAME = "s3_dir";
- 	@Transactional
-	public void uploadS3File(MultipartFile file, long parentId) throws Exception {
+	@Value("${cloud.aws.s3.bucket}")	
+  	private String bucketName;
+	private final String S3_NAME = "tabletop";
+	private String STORE_DIR_NAME = null;
+ 	
+	@Transactional
+	public void uploadS3File(MultipartFile file, Long parentId, ImageParentType parentType) throws Exception {
 		
 		if(file == null) {
 			throw new Exception("파일 전달 오류 발생");
@@ -66,11 +68,15 @@ public class S3ImageService {
 			
 			Long fileNo = ImageRepository.save(image).getImageId();
 			
+			if(parentType == ImageParentType.STORE) {
+				STORE_DIR_NAME = parentId.toString();
+			}
+			
 			if(fileNo != null) {
 				File uploadFile = new File(image.getFilepath() + "\\" + image.getFilename());
 				file.transferTo(uploadFile);
 				
-				amazonS3.putObject(new PutObjectRequest(bucketName, DIR_NAME + "/" + uploadFile.getName(), uploadFile)
+				amazonS3.putObject(new PutObjectRequest(bucketName, S3_NAME + File.separator + STORE_DIR_NAME + File.separator + uploadFile.getName(), uploadFile)
                       .withCannedAcl(CannedAccessControlList.PublicRead));
 				
 				if(uploadFile.exists()) {
@@ -87,7 +93,7 @@ public class S3ImageService {
 			Image = ImageRepository.findById(fileNo)
 												.orElseThrow(() -> new NoSuchElementException("파일 없음"));
 			
-	        S3Object awsS3Object = amazonS3.getObject(new GetObjectRequest(bucketName, DIR_NAME + "/" + Image.getFilename()));
+	        S3Object awsS3Object = amazonS3.getObject(new GetObjectRequest(bucketName, S3_NAME + File.separator + STORE_DIR_NAME + File.separator + Image.getFilename()));
 	        S3ObjectInputStream s3is = awsS3Object.getObjectContent();
 			
 			resource = new InputStreamResource(s3is);
