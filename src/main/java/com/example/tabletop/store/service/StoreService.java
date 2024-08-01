@@ -1,25 +1,15 @@
 package com.example.tabletop.store.service;
 
 import java.io.File;
-<<<<<<< Updated upstream
 import java.io.IOException;
-=======
-<<<<<<< Updated upstream
-=======
->>>>>>> Stashed changes
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-<<<<<<< Updated upstream
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-=======
-import java.util.Arrays;
->>>>>>> Stashed changes
->>>>>>> Stashed changes
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -292,31 +282,6 @@ public class StoreService {
 	}
 	
 	// Entity -> StoreDetailsDTO
-<<<<<<< Updated upstream
-=======
-<<<<<<< Updated upstream
-		public StoreDetailsDTO entityToStoreDetailsDTO(Store entity) {
-			
-			StoreDetailsDTO dto = StoreDetailsDTO.builder()
-//								.storeId(entity.getStoreId())
-								.name(entity.getName())
-								.storeType(entity.getStoreType())
-								.corporateRegistrationNumber(entity.getCorporateRegistrationNumber())
-								.openDate(entity.getOpenDate())
-								.closeDate(entity.getCloseDate())
-								.description(entity.getDescription())
-								.address(entity.getAddress())
-								.notice(entity.getNotice())
-								.openTime(entity.getOpenTime())
-								.closeTime(entity.getCloseTime())
-								.holidays(entity.getHolidays())
-//								.seller(entity.getSeller())
-								.build();
-			
-			return dto;
-		}
-=======
->>>>>>> Stashed changes
 	public StoreDetailsDTO entityToStoreDetailsDTO(Store entity) {
 		
 		StoreDetailsDTO dto = StoreDetailsDTO.builder()
@@ -333,18 +298,11 @@ public class StoreService {
 							.closeTime(entity.getCloseTime())
 							.holidays(entity.getHolidays())
 							.sellerName(entity.getSeller().getUsername())
-<<<<<<< Updated upstream
-=======
 							.s3Url(entity.getImage().getS3Url())
->>>>>>> Stashed changes
 							.build();
 		
 		return dto;
 	}
-<<<<<<< Updated upstream
-=======
->>>>>>> Stashed changes
->>>>>>> Stashed changes
 		
 	// StoreDetailsDTO -> Entity
 	public Store StoreDetailsDTOToEntity(StoreDetailsDTO dto, Long sellerId) {
