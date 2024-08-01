@@ -10,5 +10,5 @@ public class MenuDTO {
     private Integer price;
     private String description;
     private Boolean isAvailable = true;
-    private MultipartFile image;
+    private String imagePath;
 }

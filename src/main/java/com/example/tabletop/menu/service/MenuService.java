@@ -83,6 +83,7 @@ public class MenuService {
         return savedMenu;
     }
 
+
     @Transactional
     public Menu updateMenu(Long storeId, Long menuId, String name, Integer price, String description, Boolean isAvailable, MultipartFile imageFile) throws IOException {
         log.info("Updating menu with id: {} for store id: {}", menuId, storeId);
