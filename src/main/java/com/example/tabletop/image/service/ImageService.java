@@ -24,20 +24,21 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 public class ImageService {
+	@Value("${store.files.save.dir}")
+	String saveDir;
+	
     private final ImageRepository imageRepository;
-    private final String uploadDir;
 
     @Autowired
-    public ImageService(ImageRepository imageRepository, @Value("${app.upload.dir:uploads}") String uploadDir) {
+    public ImageService(ImageRepository imageRepository) {
         this.imageRepository = imageRepository;
-        this.uploadDir = uploadDir;
     }
 
     @Transactional
     public Image saveImage(MultipartFile file, Long parentId, ImageParentType parentType) throws ImageProcessingException {
         try {
             String filename = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-            Path filepath = Paths.get(uploadDir, filename);
+            Path filepath = Paths.get(saveDir, filename);
             Files.createDirectories(filepath.getParent());
             Files.write(filepath, file.getBytes());
             Image image = new Image(
