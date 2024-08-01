@@ -1,5 +1,6 @@
 package com.example.tabletop.commons.config;
 
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -36,11 +37,12 @@ public class WebSecurityConfig {
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 
                 .authorizeHttpRequests((request) -> request
+                		.requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll() // test
                         .requestMatchers("/api/sellers/signup", "/api/sellers/exists").permitAll()
                         .requestMatchers("/api/stores/*/menus", "/api/stores/*", "/api/stores/*/details").permitAll()
                         .requestMatchers("/api/orders/").permitAll()
                         .requestMatchers("/api/auth/login", "/api/auth/{loginId}", "/api/auth/token/refresh").permitAll()
-                        .requestMatchers("/api/mail/**").permitAll()
+                        .requestMatchers("/api/mail/**", "/api/s3/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 

@@ -1,26 +1,15 @@
 package com.example.tabletop.store.service;
 
 import java.io.File;
-<<<<<<< Updated upstream
 import java.io.IOException;
-=======
-<<<<<<< Updated upstream
-=======
->>>>>>> Stashed changes
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-<<<<<<< Updated upstream
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Base64;
 import java.util.Arrays;
-=======
-import java.util.Arrays;
->>>>>>> Stashed changes
->>>>>>> Stashed changes
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -29,24 +18,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-<<<<<<< Updated upstream
-import com.example.tabletop.image.entity.Image;
-import com.example.tabletop.image.enums.ImageParentType;
-import com.example.tabletop.image.service.ImageService;
-import com.example.tabletop.seller.entity.Seller;
-import com.example.tabletop.seller.repository.SellerRepository;
-=======
-<<<<<<< Updated upstream
-import com.example.tabletop.seller.service.SellerService;
-=======
-import com.example.tabletop.image.entity.Image;
-import com.example.tabletop.image.enums.ImageParentType;
 import com.example.tabletop.image.exception.ImageProcessingException;
+import com.example.tabletop.image.entity.Image;
+import com.example.tabletop.image.enums.ImageParentType;
 import com.example.tabletop.image.service.ImageService;
 import com.example.tabletop.seller.entity.Seller;
 import com.example.tabletop.seller.repository.SellerRepository;
->>>>>>> Stashed changes
->>>>>>> Stashed changes
 import com.example.tabletop.store.dto.StoreDetailsDTO;
 import com.example.tabletop.store.dto.StoreListResponseDTO;
 import com.example.tabletop.store.entity.Store;
@@ -86,14 +63,6 @@ public class StoreService {
 		return storeRepository.existsByCorporateRegistrationNumber(corporateRegistrationNumber);
 	}
 	
-<<<<<<< Updated upstream
-=======
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 	// loginId로 판매자를 조회하여 그 판매자에게 가게 등록
 	public void insertStore(String loginId, 
 							String name,
@@ -116,8 +85,6 @@ public class StoreService {
                 	log.error("Seller not found with login_id: {}", loginId);
                 	return new EntityNotFoundException("Seller not found with login_id: " + loginId);
                 });
-<<<<<<< Updated upstream
-=======
 		
 		// 시간 변환(String -> LocalTime)
 		LocalTime parsedOpenTime = null;
@@ -213,133 +180,6 @@ public class StoreService {
 		return dto;
 	}
 	
->>>>>>> Stashed changes
-	// 가게 수정
-	@Transactional
-	public void updateStoreByStoreId(Long storeId, StoreDetailsDTO storeDetailsDTO) {
-		Store storeEntity = storeRepository.findById(storeId)
-			.orElseThrow(() -> new EntityNotFoundException("Store not found with id: " + storeId));
->>>>>>> Stashed changes
-		
-		// 시간 변환(String -> LocalTime)
-		LocalTime parsedOpenTime = null;
-        LocalTime parsedCloseTime = null;
-		
-		try {
-            parsedOpenTime = LocalTime.parse(openTime, DateTimeFormatter.ISO_LOCAL_TIME);
-            parsedCloseTime = LocalTime.parse(closeTime, DateTimeFormatter.ISO_LOCAL_TIME);
-        } catch (DateTimeParseException e) {
-            System.out.println("Invalid format: " + parsedOpenTime);
-            System.out.println("Invalid format: " + parsedCloseTime);
-        }
-		
-		// String 배열을 Set<String>로 변환
-		Set<String> holidaySet = Arrays.stream(holidays).collect(Collectors.toSet());
-		
-		// dto 객체 생성
-		StoreDetailsDTO dto = null;
-		
-		if(storeType.equals(StoreType.ORDINARY.getName())) {
-			dto = StoreDetailsDTO.builder()
-								.name(name)
-								.storeType(StoreType.ORDINARY)
-								.corporateRegistrationNumber(corporateRegistrationNumber)
-								.description(description)
-								.address(address)
-								.notice(notice)
-								.openTime(parsedOpenTime)
-								.closeTime(parsedCloseTime)
-								.holidays(holidaySet)
-								.sellerName(seller.getUsername())
-								.build();
-		} else if(storeType.equals(StoreType.TEMPORARY.getName())) {
-			// 날짜 변환(String -> LocalDate)
-	        LocalDate parsedOpenDate = null;
-	        LocalDate parsedCloseDate = null;
-			
-			try {
-	            parsedOpenDate = LocalDate.parse(openDate, DateTimeFormatter.ISO_LOCAL_DATE);
-	            parsedCloseDate = LocalDate.parse(closeDate, DateTimeFormatter.ISO_LOCAL_DATE);
-	        } catch (DateTimeParseException e) {
-	            System.out.println("Invalid format: " + parsedOpenDate);
-	            System.out.println("Invalid format: " + parsedCloseDate);
-	        }
-			
-			dto = StoreDetailsDTO.builder()
-								.name(name)
-								.storeType(StoreType.TEMPORARY)
-								.openDate(parsedOpenDate)
-								.closeDate(parsedCloseDate)
-								.description(description)
-								.address(address)
-								.notice(notice)
-								.openTime(parsedOpenTime)
-								.closeTime(parsedCloseTime)
-								.holidays(holidaySet)
-								.sellerName(seller.getUsername())
-								.build();
-		}
-
-		// 이미지를 추가해야 하므로 바로 저장 필요
-		Store storeEntity = storeRepository.saveAndFlush(StoreDetailsDTOToEntity(dto, seller.getId()));
-		
-		log.info("Created new store with id: {} for login id: {}", storeEntity.getStoreId(), loginId);
-		
-		if (imageFile != null && !imageFile.isEmpty()) {
-<<<<<<< Updated upstream
-            Image image = imageService.saveImage(imageFile, storeEntity.getStoreId(), ImageParentType.STORE);
-            storeEntity.setImage(image);
-            storeRepository.save(storeEntity);
-=======
-            Image imageEntity;
-			try {
-				imageEntity = imageService.saveImage(imageFile, storeEntity.getStoreId(), ImageParentType.STORE);
-				storeEntity.setImage(imageEntity);
-				storeRepository.save(storeEntity);
-			} catch (ImageProcessingException e) {
-				e.printStackTrace();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
->>>>>>> Stashed changes
-        }
-		
-	}
-	
-	// 가게 상세 정보 조회
-	public StoreDetailsDTO getStoreDetails(Long storeId) {
-		log.info("Fetching store with id: {}", storeId);
-		
-		Store store = storeRepository.findById(storeId)
-				.orElseThrow(() -> {
-					log.error("Store not found with id: {}", storeId);
-					return new EntityNotFoundException("Store not found with id: " + storeId);
-				});
-		
-		StoreDetailsDTO dto = entityToStoreDetailsDTO(store);
-		
-		if(store.getImage() != null) {			
-			// 서버에 저장된 이미지 경로를 통해 base64파일로 변환하여 전달
-			Path filepath =  Paths.get(store.getImage().getFilepath());
-			if (Files.exists(filepath)) {
-				byte[] fileBytes = null;
-				try {
-					fileBytes = Files.readAllBytes(filepath);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				String base64File = Base64.getEncoder().encodeToString(fileBytes);
-				dto.setImageBase64(base64File);
-			}
-		}
-		
-		return dto;
-	}
-	
-<<<<<<< Updated upstream
-=======
->>>>>>> Stashed changes
->>>>>>> Stashed changes
 	// 가게 수정
 	@Transactional
 	public void updateStoreByStoreId(Long storeId,
@@ -383,16 +223,6 @@ public class StoreService {
 								parsedCloseTime,
 								holidaySet);
 		
-<<<<<<< Updated upstream
-		// 이미지 변경 - 삭제되어 없거나 바뀌었거나,,, 삭제 어떻게????
-		if (imageFile != null && !imageFile.isEmpty()) {
-            Image image = imageService.saveImage(imageFile, storeEntity.getStoreId(), ImageParentType.STORE);
-            storeEntity.setImage(image);
-        }
-=======
-<<<<<<< Updated upstream
-		// 이미지 변경 구현 필요
-=======
 		// 이미지 변경 - 삭제되어 없거나 바뀌었거나,,, 삭제 어떻게????
 		if (imageFile != null && !imageFile.isEmpty()) {
             Image imageEntity;
@@ -405,8 +235,6 @@ public class StoreService {
 				e.printStackTrace();
 			}
         }
->>>>>>> Stashed changes
->>>>>>> Stashed changes
 		
 		storeRepository.save(storeEntity);
 		log.info("Updated store with id: {}", storeId);

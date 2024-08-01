@@ -1,17 +1,28 @@
 package com.example.tabletop.menu.controller;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.example.tabletop.menu.dto.MenuDTO;
 import com.example.tabletop.menu.entity.Menu;
 import com.example.tabletop.menu.exception.MenuNotFoundException;
 import com.example.tabletop.menu.service.MenuService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping
@@ -37,19 +48,22 @@ public class MenuController {
     }
     
     // 메뉴 등록 
-    @PostMapping("/api/stores/{storeId}/menus")
+    @PostMapping(value = "/api/stores/{storeId}/menus", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<MenuDTO> createMenu(
             @PathVariable Long storeId,
-            @RequestBody MenuDTO menuDTO) {
-    	System.out.println("Received: " + menuDTO);
+            @RequestPart("name") String name,
+            @RequestPart("price") Integer price,
+            @RequestPart("description") String description,
+            @RequestPart("isAvailable") Boolean isAvailable,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
         try {
             Menu newMenu = menuService.createMenu(
                 storeId, 
-                menuDTO.getName(), 
-                menuDTO.getPrice(), 
-                menuDTO.getDescription(), 
-                menuDTO.getIsAvailable(), 
-                menuDTO.getImage()
+                name, 
+                price, 
+                description, 
+                isAvailable, 
+                image
             );
             return new ResponseEntity<>(convertToDTO(newMenu), HttpStatus.CREATED);
         } catch (IOException e) {
@@ -57,21 +71,24 @@ public class MenuController {
         }
     }
 
-    // 메뉴 수정
-    @PutMapping("/api/stores/{storeId}/menus/{menuId}")
+    @PutMapping(value = "/api/stores/{storeId}/menus/{menuId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updateMenu(
             @PathVariable Long storeId,
             @PathVariable Long menuId,
-            @RequestBody MenuDTO menuDTO) {
+            @RequestPart("name") String name,
+            @RequestPart("price") Integer price,
+            @RequestPart("description") String description,
+            @RequestPart("isAvailable") Boolean isAvailable,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
         try {
             Menu updatedMenu = menuService.updateMenu(
                 storeId,
                 menuId,
-                menuDTO.getName(),
-                menuDTO.getPrice(),
-                menuDTO.getDescription(),
-                menuDTO.getIsAvailable(),
-                menuDTO.getImage()
+                name,
+                price,
+                description,
+                isAvailable,
+                image
             );
             return ResponseEntity.ok(convertToDTO(updatedMenu));
         } catch (MenuNotFoundException e) {
@@ -113,6 +130,11 @@ public class MenuController {
         dto.setPrice(menu.getPrice());
         dto.setDescription(menu.getDescription());
         dto.setIsAvailable(menu.getIsAvailable());
+        
+        if (menu.getImage() != null) {
+            dto.setImagePath(menu.getImage().getFilepath());
+        }
+        
         return dto;
     }
 }
