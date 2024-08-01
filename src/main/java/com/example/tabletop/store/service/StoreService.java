@@ -9,7 +9,6 @@ import java.time.format.DateTimeParseException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Base64;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -19,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.tabletop.image.exception.ImageProcessingException;
 import com.example.tabletop.image.entity.Image;
 import com.example.tabletop.image.enums.ImageParentType;
 import com.example.tabletop.image.service.ImageService;
@@ -151,9 +151,16 @@ public class StoreService {
 		log.info("Created new store with id: {} for login id: {}", storeEntity.getStoreId(), loginId);
 		
 		if (imageFile != null && !imageFile.isEmpty()) {
-            Image image = imageService.saveImage(imageFile, storeEntity.getStoreId(), ImageParentType.STORE);
-            storeEntity.setImage(image);
-            storeRepository.save(storeEntity);
+            Image imageEntity;
+			try {
+				imageEntity = imageService.saveImage(imageFile, storeEntity.getStoreId(), ImageParentType.STORE);
+				storeEntity.setImage(imageEntity);
+				storeRepository.save(storeEntity);
+			} catch (ImageProcessingException e) {
+				e.printStackTrace();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
         }
 		
 	}
@@ -169,22 +176,7 @@ public class StoreService {
 				});
 		
 		StoreDetailsDTO dto = entityToStoreDetailsDTO(store);
-		
-		if(store.getImage() != null) {			
-			// 서버에 저장된 이미지 경로를 통해 base64파일로 변환하여 전달
-			Path filepath =  Paths.get(store.getImage().getFilepath());
-			if (Files.exists(filepath)) {
-				byte[] fileBytes = null;
-				try {
-					fileBytes = Files.readAllBytes(filepath);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				String base64File = Base64.getEncoder().encodeToString(fileBytes);
-				dto.setImageBase64(base64File);
-			}
-		}
-		
+				
 		return dto;
 	}
 	
@@ -233,8 +225,15 @@ public class StoreService {
 		
 		// 이미지 변경 - 삭제되어 없거나 바뀌었거나,,, 삭제 어떻게????
 		if (imageFile != null && !imageFile.isEmpty()) {
-            Image image = imageService.saveImage(imageFile, storeEntity.getStoreId(), ImageParentType.STORE);
-            storeEntity.setImage(image);
+            Image imageEntity;
+			try {
+				imageEntity = imageService.saveImage(imageFile, storeEntity.getStoreId(), ImageParentType.STORE);
+				storeEntity.setImage(imageEntity);
+			} catch (ImageProcessingException e) {
+				e.printStackTrace();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
         }
 		
 		storeRepository.save(storeEntity);
