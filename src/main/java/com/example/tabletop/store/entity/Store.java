@@ -96,25 +96,10 @@ public class Store {
     @ManyToOne
 	@JoinColumn(name = "seller_id")
 	private Seller seller;
-<<<<<<< Updated upstream
-    
-<<<<<<< Updated upstream
-    @OneToOne(cascade = CascadeType.REMOVE) // 판매자 삭제을 위한 remove 적용
-=======
 
     @ToString.Exclude
     @OneToOne(cascade = CascadeType.REMOVE)
->>>>>>> Stashed changes
     @JoinColumn(name = "image_id")
-=======
-<<<<<<< Updated upstream
-    @OneToOne(mappedBy = "store", cascade = CascadeType.REMOVE)
-=======
-    @ToString.Exclude
-    @OneToOne(cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "image_id")
->>>>>>> Stashed changes
->>>>>>> Stashed changes
     private Image image;
     
     @OneToMany(mappedBy = "store", cascade = CascadeType.REMOVE)
