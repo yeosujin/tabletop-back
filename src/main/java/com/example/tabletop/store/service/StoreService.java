@@ -1,21 +1,15 @@
 package com.example.tabletop.store.service;
 
 import java.io.File;
-<<<<<<< Updated upstream
-=======
 import java.io.IOException;
->>>>>>> Stashed changes
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-<<<<<<< Updated upstream
-=======
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Base64;
->>>>>>> Stashed changes
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -45,17 +39,13 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 public class StoreService {
-	@Value("${store.files.save.path}")
-	String savePath;
+	@Value("${store.files.save.dir}")
+	String saveDir;
 	
 	private final StoreRepository storeRepository;
 	private final SellerRepository sellerRepository;
 	private final ImageService imageService;
 	
-<<<<<<< Updated upstream
-	
-=======
->>>>>>> Stashed changes
 	// loginId에 해당하는 모든 가게 조회
 	public List<StoreListResponseDTO> getStoreListByLoginId(String loginId) {
 		log.info("Fetching stores for login id: {}", loginId);
@@ -163,10 +153,7 @@ public class StoreService {
 		if (imageFile != null && !imageFile.isEmpty()) {
             Image image = imageService.saveImage(imageFile, storeEntity.getStoreId(), ImageParentType.STORE);
             storeEntity.setImage(image);
-<<<<<<< Updated upstream
-=======
             storeRepository.save(storeEntity);
->>>>>>> Stashed changes
         }
 		
 	}
@@ -174,19 +161,13 @@ public class StoreService {
 	// 가게 상세 정보 조회
 	public StoreDetailsDTO getStoreDetails(Long storeId) {
 		log.info("Fetching store with id: {}", storeId);
-<<<<<<< Updated upstream
-=======
 		
->>>>>>> Stashed changes
 		Store store = storeRepository.findById(storeId)
 				.orElseThrow(() -> {
 					log.error("Store not found with id: {}", storeId);
 					return new EntityNotFoundException("Store not found with id: " + storeId);
 				});
 		
-<<<<<<< Updated upstream
-		return entityToStoreDetailsDTO(store);
-=======
 		StoreDetailsDTO dto = entityToStoreDetailsDTO(store);
 		
 		
@@ -204,7 +185,6 @@ public class StoreService {
         }
 		
 		return dto;
->>>>>>> Stashed changes
 	}
 	
 	// 가게 수정
@@ -271,7 +251,7 @@ public class StoreService {
 				});
 		
 		// 가게의 이미지파일 폴더 삭제(가게 이미지 + 메뉴 이미지)
-		String storeDir = savePath + File.separator + storeId.toString();
+		String storeDir = saveDir + File.separator + storeId.toString();
 		File directory = new File(storeDir);
 		if (directory.exists()) {
 			File[] files = directory.listFiles();
@@ -318,10 +298,7 @@ public class StoreService {
 							.closeTime(entity.getCloseTime())
 							.holidays(entity.getHolidays())
 							.sellerName(entity.getSeller().getUsername())
-<<<<<<< Updated upstream
-=======
 							.imageFilePath(entity.getImage().getFilepath())
->>>>>>> Stashed changes
 							.build();
 		
 		return dto;

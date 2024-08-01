@@ -30,9 +30,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:3000")
 public class StoreController {
-
-	@Value("${store.files.save.path}")
-	String savePath;
+	@Value("${store.files.save.dir}")
+	String saveDir;
 	
 	private final StoreService storeService;
 	
@@ -59,7 +58,7 @@ public class StoreController {
 		} else {
 			result.put("isDuplicated", "false");
 		}
-		
+
 		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
 	
@@ -67,28 +66,14 @@ public class StoreController {
 	@PostMapping("api/store/{loginId}")
 	public ResponseEntity<String> insertStore(@PathVariable String loginId,
 												@RequestPart("storeData") StoreRequestDTO storeRequest,
-<<<<<<< Updated upstream
-												@RequestPart(required = false) MultipartFile image) {
-=======
 												@RequestPart(value = "image", required = false) MultipartFile imageFile) {
->>>>>>> Stashed changes
 		try {
-			storeService.insertStore(loginId, 
-									storeRequest.getName(), 
-									storeRequest.getStoreType(), 
-									storeRequest.getCorporateRegistrationNumber(), 
-									storeRequest.getOpenDate(), 
+			storeService.insertStore(loginId,
+									storeRequest.getName(),
+									storeRequest.getStoreType(),
+									storeRequest.getCorporateRegistrationNumber(),
+									storeRequest.getOpenDate(),
 									storeRequest.getCloseDate(),
-<<<<<<< Updated upstream
-									storeRequest.getDescription(), 
-									storeRequest.getAddress(), 
-									storeRequest.getNotice(), 
-									storeRequest.getOpenTime(), 
-									storeRequest.getCloseTime(), 
-									storeRequest.getHolidays(), 
-									image);
-			
-=======
 									storeRequest.getDescription(),
 									storeRequest.getAddress(),
 									storeRequest.getNotice(),
@@ -97,21 +82,16 @@ public class StoreController {
 									storeRequest.getHolidays(),
 									imageFile);
 
->>>>>>> Stashed changes
 			return ResponseEntity.status(HttpStatus.OK).body("등록 성공");
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred");
 		}
 		
 	}
-	
+
 	// 가게 상세 정보 조회
 	@GetMapping("api/stores/{storeId}/details")
 	public ResponseEntity<?> getStoreDetails(@PathVariable Long storeId) {
-<<<<<<< Updated upstream
-		log.info("<getStoreDetails> Request received: {}", storeId);
-=======
->>>>>>> Stashed changes
 		try {
 			StoreDetailsDTO storeDetails = storeService.getStoreDetails(storeId);
 			return new ResponseEntity<StoreDetailsDTO>(storeDetails, HttpStatus.OK);
@@ -124,11 +104,7 @@ public class StoreController {
 	@PutMapping("api/stores/{storeId}")
 	public ResponseEntity<String> updateStoreByStoreId(@PathVariable Long storeId,
 									@RequestPart("storeData") StoreRequestDTO storeRequest,
-<<<<<<< Updated upstream
-									@RequestPart(required = false) MultipartFile image) {
-=======
 									@RequestPart(value = "image", required = false) MultipartFile imageFile) {
->>>>>>> Stashed changes
 		
 		try {
 			storeService.updateStoreByStoreId(storeId,
@@ -136,14 +112,10 @@ public class StoreController {
 											storeRequest.getDescription(),
 											storeRequest.getAddress(),
 											storeRequest.getNotice(),
-											storeRequest.getOpenTime(), 
-											storeRequest.getCloseTime(), 
+											storeRequest.getOpenTime(),
+											storeRequest.getCloseTime(),
 											storeRequest.getHolidays(),
-<<<<<<< Updated upstream
-											image);
-=======
 											imageFile);
->>>>>>> Stashed changes
 
 			return ResponseEntity.status(HttpStatus.OK).body("수정 성공");
 		} catch (Exception e) {

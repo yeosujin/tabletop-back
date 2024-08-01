@@ -37,6 +37,8 @@ public class WebSecurityConfig {
                 
                 .authorizeHttpRequests((request) -> request
                         .requestMatchers("/api/sellers/signup", "/api/sellers/exists").permitAll()
+                        .requestMatchers("/api/stores/*/menus", "/api/stores/*", "/api/stores/*/details").permitAll()
+                        .requestMatchers("/api/orders/").permitAll()
                         .requestMatchers("/api/auth/login", "/api/auth/{loginId}", "/api/auth/token/refresh").permitAll()
                         .requestMatchers("/api/mail/**").permitAll()
                         .anyRequest().authenticated()

@@ -4,10 +4,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Set;
 
-<<<<<<< Updated upstream
-import com.example.tabletop.seller.entity.Seller;
-=======
->>>>>>> Stashed changes
 import com.example.tabletop.store.enums.StoreType;
 
 import lombok.Builder;
@@ -15,7 +11,6 @@ import lombok.Data;
 
 @Data
 public class StoreDetailsDTO {
-
 	private Long storeId;
     private String name;
     private StoreType storeType;
@@ -29,22 +24,14 @@ public class StoreDetailsDTO {
     private LocalTime closeTime;
     private Set<String> holidays;
 	private String sellerName;
-<<<<<<< Updated upstream
-=======
 	private String imageFilePath;
 	private String imageBase64;
->>>>>>> Stashed changes
     
     @Builder
     public StoreDetailsDTO(Long storeId, String name, StoreType storeType, String corporateRegistrationNumber,
     		LocalDate openDate, LocalDate closeDate, String description, String address, String notice,
-<<<<<<< Updated upstream
-    		LocalTime openTime, LocalTime closeTime, Set<String> holidays, String sellerName) {
-    	super();
-=======
     		LocalTime openTime, LocalTime closeTime, Set<String> holidays, String sellerName, String imageFilePath, String imageBase64) {
 
->>>>>>> Stashed changes
     	this.storeId = storeId;
     	this.name = name;
     	this.storeType = storeType;
@@ -58,11 +45,8 @@ public class StoreDetailsDTO {
     	this.closeTime = closeTime;
     	this.holidays = holidays;
     	this.sellerName = sellerName;
-<<<<<<< Updated upstream
-=======
     	this.imageFilePath = imageFilePath;
     	this.imageBase64 = imageBase64;
->>>>>>> Stashed changes
     }
     
 }
