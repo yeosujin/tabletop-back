@@ -9,7 +9,6 @@ import java.time.format.DateTimeParseException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Base64;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -177,22 +176,7 @@ public class StoreService {
 				});
 		
 		StoreDetailsDTO dto = entityToStoreDetailsDTO(store);
-		
-		if(store.getImage() != null) {			
-			// 서버에 저장된 이미지 경로를 통해 base64파일로 변환하여 전달
-			Path filepath =  Paths.get(store.getImage().getFilepath());
-			if (Files.exists(filepath)) {
-				byte[] fileBytes = null;
-				try {
-					fileBytes = Files.readAllBytes(filepath);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				String base64File = Base64.getEncoder().encodeToString(fileBytes);
-				dto.setImageBase64(base64File);
-			}
-		}
-		
+				
 		return dto;
 	}
 	
