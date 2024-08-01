@@ -33,7 +33,7 @@ public class ImageService {
 	String saveDir;
 	
 	@Value("${cloud.aws.s3.bucket}")	
-  	private final String bucketName;
+  	String bucketName;
 	
 	private final String S3_NAME = "tabletop";
 	private String STORE_DIR_NAME = null;
@@ -55,42 +55,38 @@ public class ImageService {
         	log.info("Saving image entity");
         	
             String filename = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-            
-            Path filepath = Paths.get(saveDir, filename);
-            Files.createDirectories(filepath.getParent());
-            Files.write(filepath, file.getBytes());
-            
+                        
             Image imageEntity = Image.builder()
 					.parentId(parentId)
 					.parentType(parentType)
 					.filename(filename)
 					.fileOriginalName(file.getOriginalFilename())
+					.filepath("C:\\tabletop")
 					.build();
-            
-            try {
-        		log.info("Saving image to S3");
-        		
-        		if(imageEntity.getImageId() != null) {
-    				File uploadFile = new File(imageEntity.getFilepath() + "\\" + imageEntity.getFilename());
-    				file.transferTo(uploadFile);
-    				
-    				amazonS3.putObject(new PutObjectRequest(bucketName, S3_NAME + File.separator + STORE_DIR_NAME + File.separator + uploadFile.getName(), uploadFile)
-                          .withCannedAcl(CannedAccessControlList.PublicRead));
-    				
-    				if(uploadFile.exists()) {
-    					uploadFile.delete();
-    				}
-    				
-    			}
-    		} catch (Exception e) {
-    			e.printStackTrace();
+           
+            Image savedImageEntity = imageRepository.save(imageEntity);
+    		if(savedImageEntity.getImageId() != null) {
+    			log.info("Saving image to S3");
+				File uploadFile = new File(imageEntity.getFilepath() + "\\" + imageEntity.getFilename());
+				file.transferTo(uploadFile);
+				
+				amazonS3.putObject(new PutObjectRequest(bucketName, S3_NAME + "/" + STORE_DIR_NAME + "/" + uploadFile.getName(), uploadFile)
+                      .withCannedAcl(CannedAccessControlList.PublicRead));
+				
+				if(uploadFile.exists()) {
+					uploadFile.delete();
+				}
     		}
-            
-            return imageRepository.save(imageEntity);
+    			
+            return savedImageEntity;
         } catch (IOException e) {
             log.error("Failed to save image", e);
             throw new ImageProcessingException("Failed to save image: " + e.getMessage());
-        }
+        } catch (Exception e) {
+			e.printStackTrace();
+		}
+        
+		return null;
     }
 
     @Transactional(readOnly = true)
