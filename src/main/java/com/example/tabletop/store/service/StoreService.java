@@ -19,24 +19,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-<<<<<<< Updated upstream
-import com.example.tabletop.image.entity.Image;
-import com.example.tabletop.image.enums.ImageParentType;
-import com.example.tabletop.image.service.ImageService;
-import com.example.tabletop.seller.entity.Seller;
-import com.example.tabletop.seller.repository.SellerRepository;
-=======
-<<<<<<< Updated upstream
-import com.example.tabletop.seller.service.SellerService;
-=======
-import com.example.tabletop.image.entity.Image;
-import com.example.tabletop.image.enums.ImageParentType;
 import com.example.tabletop.image.exception.ImageProcessingException;
+import com.example.tabletop.image.entity.Image;
+import com.example.tabletop.image.enums.ImageParentType;
 import com.example.tabletop.image.service.ImageService;
 import com.example.tabletop.seller.entity.Seller;
 import com.example.tabletop.seller.repository.SellerRepository;
->>>>>>> Stashed changes
->>>>>>> Stashed changes
 import com.example.tabletop.store.dto.StoreDetailsDTO;
 import com.example.tabletop.store.dto.StoreListResponseDTO;
 import com.example.tabletop.store.entity.Store;
@@ -76,11 +64,6 @@ public class StoreService {
 		return storeRepository.existsByCorporateRegistrationNumber(corporateRegistrationNumber);
 	}
 	
-<<<<<<< Updated upstream
-=======
-<<<<<<< Updated upstream
-=======
->>>>>>> Stashed changes
 	// loginId로 판매자를 조회하여 그 판매자에게 가게 등록
 	public void insertStore(String loginId, 
 							String name,
@@ -169,11 +152,6 @@ public class StoreService {
 		log.info("Created new store with id: {} for login id: {}", storeEntity.getStoreId(), loginId);
 		
 		if (imageFile != null && !imageFile.isEmpty()) {
-<<<<<<< Updated upstream
-            Image image = imageService.saveImage(imageFile, storeEntity.getStoreId(), ImageParentType.STORE);
-            storeEntity.setImage(image);
-            storeRepository.save(storeEntity);
-=======
             Image imageEntity;
 			try {
 				imageEntity = imageService.saveImage(imageFile, storeEntity.getStoreId(), ImageParentType.STORE);
@@ -184,7 +162,6 @@ public class StoreService {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
->>>>>>> Stashed changes
         }
 		
 	}
@@ -219,10 +196,6 @@ public class StoreService {
 		return dto;
 	}
 	
-<<<<<<< Updated upstream
-=======
->>>>>>> Stashed changes
->>>>>>> Stashed changes
 	// 가게 수정
 	@Transactional
 	public void updateStoreByStoreId(Long storeId,
@@ -266,16 +239,6 @@ public class StoreService {
 								parsedCloseTime,
 								holidaySet);
 		
-<<<<<<< Updated upstream
-		// 이미지 변경 - 삭제되어 없거나 바뀌었거나,,, 삭제 어떻게????
-		if (imageFile != null && !imageFile.isEmpty()) {
-            Image image = imageService.saveImage(imageFile, storeEntity.getStoreId(), ImageParentType.STORE);
-            storeEntity.setImage(image);
-        }
-=======
-<<<<<<< Updated upstream
-		// 이미지 변경 구현 필요
-=======
 		// 이미지 변경 - 삭제되어 없거나 바뀌었거나,,, 삭제 어떻게????
 		if (imageFile != null && !imageFile.isEmpty()) {
             Image imageEntity;
@@ -288,8 +251,6 @@ public class StoreService {
 				e.printStackTrace();
 			}
         }
->>>>>>> Stashed changes
->>>>>>> Stashed changes
 		
 		storeRepository.save(storeEntity);
 		log.info("Updated store with id: {}", storeId);
