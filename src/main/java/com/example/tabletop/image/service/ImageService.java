@@ -62,6 +62,7 @@ public class ImageService {
 					.filename(filename)
 					.fileOriginalName(file.getOriginalFilename())
 					.filepath("C:\\tabletop")
+					.S3Url(STORE_DIR_NAME + "/" + filename) 
 					.build();
            
             Image savedImageEntity = imageRepository.save(imageEntity);
