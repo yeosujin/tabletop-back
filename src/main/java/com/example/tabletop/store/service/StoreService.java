@@ -1,11 +1,26 @@
 package com.example.tabletop.store.service;
 
 import java.io.File;
+<<<<<<< Updated upstream
+=======
+<<<<<<< Updated upstream
+=======
+import java.io.IOException;
+>>>>>>> Stashed changes
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+<<<<<<< Updated upstream
 import java.util.Arrays;
+=======
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Base64;
+import java.util.Arrays;
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -34,14 +49,24 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 public class StoreService {
-	@Value("${store.files.save.path}")
-	String savePath;
+	@Value("${store.files.save.dir}")
+	String saveDir;
 	
 	private final StoreRepository storeRepository;
 	private final SellerRepository sellerRepository;
 	private final ImageService imageService;
 	
+<<<<<<< Updated upstream
+=======
+<<<<<<< Updated upstream
+	public StoreService(StoreRepository storeRepository) {
+		this.storeRepository = storeRepository;
+		this.sellerService = new SellerService();
+	}
+>>>>>>> Stashed changes
 	
+=======
+>>>>>>> Stashed changes
 	// loginId에 해당하는 모든 가게 조회
 	public List<StoreListResponseDTO> getStoreListByLoginId(String loginId) {
 		log.info("Fetching stores for login id: {}", loginId);
@@ -59,6 +84,11 @@ public class StoreService {
 		return storeRepository.existsByCorporateRegistrationNumber(corporateRegistrationNumber);
 	}
 	
+<<<<<<< Updated upstream
+=======
+<<<<<<< Updated upstream
+=======
+>>>>>>> Stashed changes
 	// loginId로 판매자를 조회하여 그 판매자에게 가게 등록
 	public void insertStore(String loginId, 
 							String name,
@@ -149,6 +179,10 @@ public class StoreService {
 		if (imageFile != null && !imageFile.isEmpty()) {
             Image image = imageService.saveImage(imageFile, storeEntity.getStoreId(), ImageParentType.STORE);
             storeEntity.setImage(image);
+<<<<<<< Updated upstream
+=======
+            storeRepository.save(storeEntity);
+>>>>>>> Stashed changes
         }
 		
 	}
@@ -156,15 +190,42 @@ public class StoreService {
 	// 가게 상세 정보 조회
 	public StoreDetailsDTO getStoreDetails(Long storeId) {
 		log.info("Fetching store with id: {}", storeId);
+<<<<<<< Updated upstream
+=======
+		
+>>>>>>> Stashed changes
 		Store store = storeRepository.findById(storeId)
 				.orElseThrow(() -> {
 					log.error("Store not found with id: {}", storeId);
 					return new EntityNotFoundException("Store not found with id: " + storeId);
 				});
 		
+<<<<<<< Updated upstream
 		return entityToStoreDetailsDTO(store);
 	}
 	
+=======
+		StoreDetailsDTO dto = entityToStoreDetailsDTO(store);
+		
+		
+		// 서버에 저장된 이미지 경로를 통해 base64파일로 변환하여 전달
+		Path filepath =  Paths.get(store.getImage().getFilepath());
+        if (Files.exists(filepath)) {
+            byte[] fileBytes = null;
+			try {
+				fileBytes = Files.readAllBytes(filepath);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+            String base64File = Base64.getEncoder().encodeToString(fileBytes);
+            dto.setImageBase64(base64File);
+        }
+		
+		return dto;
+	}
+	
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 	// 가게 수정
 	@Transactional
 	public void updateStoreByStoreId(Long storeId,
@@ -229,7 +290,7 @@ public class StoreService {
 				});
 		
 		// 가게의 이미지파일 폴더 삭제(가게 이미지 + 메뉴 이미지)
-		String storeDir = savePath + File.separator + storeId.toString();
+		String storeDir = saveDir + File.separator + storeId.toString();
 		File directory = new File(storeDir);
 		if (directory.exists()) {
 			File[] files = directory.listFiles();
@@ -260,6 +321,31 @@ public class StoreService {
 	}
 	
 	// Entity -> StoreDetailsDTO
+<<<<<<< Updated upstream
+=======
+<<<<<<< Updated upstream
+		public StoreDetailsDTO entityToStoreDetailsDTO(Store entity) {
+			
+			StoreDetailsDTO dto = StoreDetailsDTO.builder()
+//								.storeId(entity.getStoreId())
+								.name(entity.getName())
+								.storeType(entity.getStoreType())
+								.corporateRegistrationNumber(entity.getCorporateRegistrationNumber())
+								.openDate(entity.getOpenDate())
+								.closeDate(entity.getCloseDate())
+								.description(entity.getDescription())
+								.address(entity.getAddress())
+								.notice(entity.getNotice())
+								.openTime(entity.getOpenTime())
+								.closeTime(entity.getCloseTime())
+								.holidays(entity.getHolidays())
+//								.seller(entity.getSeller())
+								.build();
+			
+			return dto;
+		}
+=======
+>>>>>>> Stashed changes
 	public StoreDetailsDTO entityToStoreDetailsDTO(Store entity) {
 		
 		StoreDetailsDTO dto = StoreDetailsDTO.builder()
@@ -276,10 +362,18 @@ public class StoreService {
 							.closeTime(entity.getCloseTime())
 							.holidays(entity.getHolidays())
 							.sellerName(entity.getSeller().getUsername())
+<<<<<<< Updated upstream
+=======
+							.imageFilePath(entity.getImage().getFilepath())
+>>>>>>> Stashed changes
 							.build();
 		
 		return dto;
 	}
+<<<<<<< Updated upstream
+=======
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 		
 	// StoreDetailsDTO -> Entity
 	public Store StoreDetailsDTOToEntity(StoreDetailsDTO dto, Long sellerId) {

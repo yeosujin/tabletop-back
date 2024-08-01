@@ -92,13 +92,23 @@ public class Store {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 	
+    @ToString.Exclude
     @ManyToOne
 	@JoinColumn(name = "seller_id")
-	@ToString.Exclude
 	private Seller seller;
     
+<<<<<<< Updated upstream
     @OneToOne(cascade = CascadeType.REMOVE) // 판매자 삭제을 위한 remove 적용
     @JoinColumn(name = "image_id")
+=======
+<<<<<<< Updated upstream
+    @OneToOne(mappedBy = "store", cascade = CascadeType.REMOVE)
+=======
+    @ToString.Exclude
+    @OneToOne(cascade = CascadeType.REMOVE)
+    @JoinColumn(name = "image_id")
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
     private Image image;
     
     @OneToMany(mappedBy = "store", cascade = CascadeType.REMOVE)
