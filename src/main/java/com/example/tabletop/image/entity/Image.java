@@ -32,6 +32,7 @@ public class Image {
     @Enumerated(EnumType.ORDINAL)
     private ImageParentType parentType;
 
+    // UUID + fileOriginalName
     @Column(name = "filename", nullable = false)
     private String filename;
 
@@ -40,15 +41,18 @@ public class Image {
     
     @Column(name = "filepath", nullable = false)
     private String filepath;
-
-    // 모든 필드를 초기화하는 생성자
+    
+    @Column(name = "s3_url", nullable = false)
+    private String S3Url;
+    
     @Builder
-    public Image(Long parentId, ImageParentType parentType, String filename, String fileOriginalName, String filepath) {
+    public Image(Long parentId, ImageParentType parentType, String filename, String fileOriginalName, String filepath, String S3Url) {
         this.parentId = parentId;
         this.parentType = parentType;
         this.filename = filename;
         this.fileOriginalName = fileOriginalName;
         this.filepath = filepath;
+        this.S3Url = S3Url;
     }
 
 }
