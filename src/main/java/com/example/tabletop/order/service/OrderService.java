@@ -4,10 +4,12 @@ import com.example.tabletop.commons.sse.service.SseService;
 import com.example.tabletop.menu.entity.Menu;
 import com.example.tabletop.menu.repository.MenuRepository;
 import com.example.tabletop.order.dto.CreateOrderRequest;
+import com.example.tabletop.order.dto.KitchenOrderResponseDto;
 import com.example.tabletop.order.dto.OrderResponseDto;
 import com.example.tabletop.order.entity.Order;
 import com.example.tabletop.order.repository.OrderRepository;
 import com.example.tabletop.orderitem.dto.OrderItemRequestDto;
+import com.example.tabletop.orderitem.dto.OrderItemResponseDto;
 import com.example.tabletop.orderitem.entity.Orderitem;
 import com.example.tabletop.orderitem.repository.OrderitemRepository;
 import com.example.tabletop.payment.dto.PaymentRequestDto;
@@ -22,9 +24,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Sinks;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
 @Service
@@ -36,8 +42,6 @@ public class OrderService {
     private final MenuRepository menuRepository;
     private final OrderitemRepository orderItemRepository;
     private final PaymentRepository paymentRepository;
-
-    private final SseService sseService;
 
     @Transactional
     public OrderResponseDto createOrder(CreateOrderRequest orderRequestDto) {
@@ -62,6 +66,8 @@ public class OrderService {
 
         Order savedOrder = orderRepository.save(order);
 
+        List<Orderitem> orderItems = new ArrayList<>();
+
         for (OrderItemRequestDto itemDto : orderRequestDto.getOrderItems()) {
             Menu menu = menuRepository.findById(itemDto.getMenuId())
                     .orElseThrow(() -> new EntityNotFoundException("Menu not found"));
@@ -72,34 +78,28 @@ public class OrderService {
             orderItem.setQuantity(itemDto.getQuantity());
             orderItem.setPrice(itemDto.getPrice());
 
-            orderItemRepository.save(orderItem);
+            orderItems.add(orderItemRepository.save(orderItem));
         }
 
-        Payment payment = createPayment(orderRequestDto.getPayment(), savedOrder, BigDecimal.valueOf(totalPrice));
+        createPayment(orderRequestDto.getPayment(), savedOrder, BigDecimal.valueOf(totalPrice));
 
-        CompletableFuture.runAsync(() -> {
-            try {
-                sseService.notifyNewOrder(store.getStoreId(), savedOrder);
-            } catch (Exception e) {
-                log.error("Failed to send SSE notification for order: " + savedOrder.getOrderId(), e);
-            }
-        });
-
-        return new OrderResponseDto(
-                savedOrder.getOrderId(),
-                savedOrder.getWaitingNumber(),
-                savedOrder.getTotalPrice(),
-                savedOrder.getCreatedAt(),
-                new PaymentResponseDto(
-                        payment.getId(),
-                        payment.getPaymentMethod().name(),
-                        payment.getAmount(),
-                        payment.getTransactionId()));
+    return new OrderResponseDto(
+        savedOrder.getOrderId(),
+        savedOrder.getWaitingNumber(),
+        savedOrder.getTotalPrice(),
+        orderItems.stream()
+            .map(
+                item ->
+                    new OrderItemResponseDto(
+                        item.getMenu().getName(), item.getQuantity(), item.getPrice()))
+            .toList(),
+        savedOrder.getCreatedAt(),
+        savedOrder.getStatus());
     }
 
-    private Payment createPayment(PaymentRequestDto paymentRequestDto, Order order, BigDecimal amount) {
+    private void createPayment(PaymentRequestDto paymentRequestDto, Order order, BigDecimal amount) {
         Payment payment = new Payment();
-        payment.setPaymentMethod(PaymentMethod.valueOf(paymentRequestDto.getPaymentMethod()));
+        payment.setPaymentMethod(PaymentMethod.valueOf(paymentRequestDto.getPaymentMethod().toUpperCase()));
         payment.setOrder(order);
         payment.setAmount(amount);
         payment.setIsRefunded(false);
@@ -107,6 +107,29 @@ public class OrderService {
         payment.setCreatedAt(LocalDateTime.now());
         payment.setUpdatedAt(LocalDateTime.now());
 
-        return paymentRepository.save(payment);
+         paymentRepository.save(payment);
+    }
+
+    public List<KitchenOrderResponseDto> readKitchenOrders(Long storeId) {
+        List<Order> orders = orderRepository.findByStore_StoreId(storeId);
+
+        return orders.stream().map(order -> {
+            List<Orderitem> orderitems = orderItemRepository.findByOrder_OrderId(order.getOrderId());
+            return new KitchenOrderResponseDto(order.getOrderId(), order.getWaitingNumber(), order.getTotalPrice(),
+                    orderitems.stream().map(orderitem -> new KitchenOrderResponseDto.KitchenOrderItemDto(orderitem.getMenu() != null ? orderitem.getMenu().getName() : "Unknown Menu", orderitem.getQuantity(), orderitem.getPrice())).toList(),
+                    order.getCreatedAt(), order.getStatus());
+        }).toList();
+
+    }
+
+    @Transactional
+    public Order updateOrderStatus(Long orderId, Integer status) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("Order not found with id: " + orderId));
+
+        order.setStatus(status);
+        order.setUpdatedAt(LocalDateTime.now());
+
+        return orderRepository.save(order);
     }
 }

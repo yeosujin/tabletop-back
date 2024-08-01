@@ -6,8 +6,6 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
 
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -16,13 +14,10 @@ import com.example.tabletop.image.entity.Image;
 import com.example.tabletop.menu.entity.Menu;
 import com.example.tabletop.order.entity.Order;
 import com.example.tabletop.seller.entity.Seller;
-import com.example.tabletop.store.enums.Day;
 import com.example.tabletop.store.enums.StoreType;
 
 import jakarta.persistence.CascadeType;
-import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
@@ -97,12 +92,13 @@ public class Store {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 	
+    @ToString.Exclude
     @ManyToOne
 	@JoinColumn(name = "seller_id")
-	@ToString.Exclude
 	private Seller seller;
-    
-    @OneToOne(cascade = CascadeType.REMOVE) // 판매자 삭제을 위한 remove 적용
+
+    @ToString.Exclude
+    @OneToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "image_id")
     private Image image;
     

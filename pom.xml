@@ -63,10 +63,19 @@
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+<<<<<<< Updated upstream
 		<dependency>
 		    <groupId>com.mysql</groupId>
    		<artifactId>mysql-connector-j</artifactId>
    		<scope>runtime</scope>
+=======
+<<<<<<< Updated upstream
+=======
+		<dependency>
+		    <groupId>com.mysql</groupId>
+  		<artifactId>mysql-connector-j</artifactId>
+  		<scope>runtime</scope>
+>>>>>>> Stashed changes
 		</dependency>		
 		<dependency>
 		    <groupId>io.jsonwebtoken</groupId>
@@ -83,12 +92,51 @@
 		    <artifactId>jjwt-jackson</artifactId>
 		    <version>0.11.5</version>
 		</dependency>
-		
+<<<<<<< Updated upstream
+=======
+		<dependency>
+	    	<groupId>org.springframework.boot</groupId>
+	    	<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webflux</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.projectreactor</groupId>
+			<artifactId>reactor-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+   	<!-- AWS Java SDK -->
+   	<dependency>
+       	<groupId>com.amazonaws</groupId>
+       	<artifactId>aws-java-sdk-s3</artifactId>
+       	<version>1.12.261</version>
+   	</dependency>
+>>>>>>> Stashed changes
+	</dependencies>
+>>>>>>> Stashed changes
+
 		<dependency>
 	    	<groupId>org.springframework.boot</groupId>
 	    	<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webflux</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.projectreactor</groupId>
+			<artifactId>reactor-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+    	<!-- AWS Java SDK -->
+    	<dependency>
+        	<groupId>com.amazonaws</groupId>
+        	<artifactId>aws-java-sdk-s3</artifactId>
+        	<version>1.12.261</version>
+    	</dependency>
 	</dependencies>
 	<build>
 		<plugins>
@@ -106,4 +154,12 @@
 			</plugin>
 		</plugins>
 	</build>
+<<<<<<< Updated upstream
+=======
+<<<<<<< Updated upstream
+
+>>>>>>> Stashed changes
 </project>
+=======
+</project>
+>>>>>>> Stashed changes

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -19,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.tabletop.image.enums.ImageParentType;
-import com.example.tabletop.image.service.ImageService;
+import com.example.tabletop.image.service.S3ImageService;
 import com.example.tabletop.menu.dto.MenuDTO;
 import com.example.tabletop.menu.entity.Menu;
 import com.example.tabletop.menu.exception.MenuNotFoundException;
@@ -34,7 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class MenuController {
     private final MenuService menuService;
-    private final ImageService imageService;
+    private final S3ImageService s3ImageService;
 
     // 메뉴 조회
     @GetMapping()
@@ -56,18 +58,17 @@ public class MenuController {
             @RequestPart("menuData") MenuDTO menuDTO,
             @RequestPart(value = "image", required = false) MultipartFile image) {
         try {
-        	Menu newMenu = menuService.createMenu(
+            Menu newMenu = menuService.createMenu(
                     storeId,
                     menuDTO.getName(),
                     menuDTO.getPrice(),
                     menuDTO.getDescription(),
-                    menuDTO.getIsAvailable(),
-                    image
+                    menuDTO.getIsAvailable()
             );
 
             // S3 image upload
             if (image != null) {
-                imageService.saveImage(image, storeId, ImageParentType.MENU);
+                s3ImageService.uploadS3File(image, newMenu.getId(), ImageParentType.MENU);
             }
 
             return new ResponseEntity<>(convertToDTO(newMenu), HttpStatus.CREATED);
@@ -91,13 +92,12 @@ public class MenuController {
                     menuDTO.getName(),
                     menuDTO.getPrice(),
                     menuDTO.getDescription(),
-                    menuDTO.getIsAvailable(),
-                    image
+                    menuDTO.getIsAvailable()
             );
 
             // S3 image upload
             if (image != null) {
-                imageService.saveImage(image, menuId, ImageParentType.MENU);
+                s3ImageService.uploadS3File(image, updatedMenu.getId(), ImageParentType.MENU);
             }
 
             return ResponseEntity.ok(convertToDTO(updatedMenu));

@@ -12,5 +12,8 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class LoginResponseDTO {
+	private String id;
+	private String tokenType;
 	private String accessToken;
+	private String refreshToken;
 }

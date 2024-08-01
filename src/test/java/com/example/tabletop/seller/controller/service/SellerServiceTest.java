@@ -1,4 +1,4 @@
-package com.example.tabletop.menu.service;
+package com.example.tabletop.seller.controller.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

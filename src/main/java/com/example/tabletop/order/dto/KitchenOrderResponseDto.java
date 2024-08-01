@@ -1,8 +1,5 @@
 package com.example.tabletop.order.dto;
 
-import com.example.tabletop.orderitem.dto.OrderItemRequestDto;
-import com.example.tabletop.orderitem.dto.OrderItemResponseDto;
-import com.example.tabletop.payment.dto.PaymentResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -11,11 +8,19 @@ import java.util.List;
 
 @Data
 @AllArgsConstructor
-public class OrderResponseDto {
+public class KitchenOrderResponseDto {
     private Long orderId;
     private Integer waitingNumber;
     private Integer totalPrice;
-    private List<OrderItemResponseDto> orderItems;
+    private List<KitchenOrderItemDto> orderItems;
     private LocalDateTime createdAt;
     private int status;
+
+    @Data
+    @AllArgsConstructor
+    public static class KitchenOrderItemDto {
+        private String menuName;
+        private Integer quantity;
+        private Integer price;
+    }
 }

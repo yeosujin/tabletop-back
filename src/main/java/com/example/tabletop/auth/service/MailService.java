@@ -7,6 +7,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.tabletop.auth.dto.PasswordResetRequestDTO;
 import com.example.tabletop.auth.exception.CertificationGenerationException;
@@ -35,11 +36,12 @@ public class MailService {
 	private final SellerRepository sellerRepository;
 	
 	// 비밀번호 찾기
+	@Transactional
 	public void resetPassword(PasswordResetRequestDTO passwordResetRequestDTO) throws CertificationGenerationException, SellerNotFoundException, CustomMessagingException {
 		log.info("비밀번호 재설정 요청: {}", passwordResetRequestDTO.getLoginId());
-		Optional<Seller> seller = sellerRepository.findByLoginIdAndUsernameAndMobile(
-				passwordResetRequestDTO.getLoginId(), passwordResetRequestDTO.getUsername(),
-				passwordResetRequestDTO.getMobile());
+		Optional<Seller> seller = sellerRepository.findByLoginIdAndEmailAndMobile(
+                passwordResetRequestDTO.getLoginId(), passwordResetRequestDTO.getEmail(),
+                passwordResetRequestDTO.getMobile());
 
 		if (seller.isPresent()) {
 			String certificationNumber = generator.createCertificationNumber();

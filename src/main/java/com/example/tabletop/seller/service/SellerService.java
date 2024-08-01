@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.tabletop.seller.dto.SellerDTO;
 import com.example.tabletop.seller.dto.SellerResponseDTO;
@@ -24,6 +25,7 @@ public class SellerService {
 	private final PasswordEncoder passwordEncoder;
 	private final SellerRepository sellerRepository;
 
+	@Transactional
 	public void signUp(SellerDTO sellerDto) {
 		log.info("새로운 판매자를 등록합니다: {}", sellerDto);
 		sellerDto.setPassword(passwordEncoder.encode(sellerDto.getPassword()));
@@ -33,6 +35,7 @@ public class SellerService {
 		sellerRepository.save(seller);
 	}
 
+	@Transactional(readOnly = true)
 	public void isLoginIdDuplicate(String loginId) throws DuplicateLoginIdException {
 		log.info("로그인 ID 중복 여부를 확인합니다: {}", loginId);
 		if (sellerRepository.findByLoginId(loginId).isPresent()) {
@@ -40,6 +43,7 @@ public class SellerService {
 		}
 	}
 	
+	@Transactional(readOnly = true)
 	public SellerResponseDTO.SellerInfoDTO getSeller(String loginId) throws SellerNotFoundException {
 		log.info("로그인 ID로 판매자 정보를 조회합니다: {}", loginId);
         Seller seller = sellerRepository.findByLoginId(loginId)
@@ -48,6 +52,7 @@ public class SellerService {
         return SellerResponseDTO.SellerInfoDTO.toDTO(seller);
     }
 
+	@Transactional
 	public SellerResponseDTO updateSeller(String loginId, SellerDTO sellerDto) throws SellerNotFoundException, InvalidSellerDataException {
 		log.info("로그인 ID {}로 판매자 정보를 업데이트합니다: {}", loginId, sellerDto);
         Seller seller = sellerRepository.findByLoginId(loginId)
@@ -282,6 +287,7 @@ Hibernate:
     where
         seller_id=?
 	 */
+	@Transactional
 	public void deleteSeller(String loginId) throws SellerNotFoundException {
 		log.info("로그인 ID {}의 판매자를 삭제합니다.", loginId);
 		Optional<Seller> seller = sellerRepository.findByLoginId(loginId);

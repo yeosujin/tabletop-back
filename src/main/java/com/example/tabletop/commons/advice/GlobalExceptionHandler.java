@@ -14,7 +14,7 @@ import com.example.tabletop.auth.exception.CertificationGenerationException;
 import com.example.tabletop.auth.exception.CustomMessagingException;
 import com.example.tabletop.auth.exception.InvalidPasswordException;
 import com.example.tabletop.auth.exception.LogoutException;
-import com.example.tabletop.auth.exception.RefreshTokenException;
+import com.example.tabletop.auth.exception.TokenException;
 import com.example.tabletop.image.exception.ImageNotFoundException;
 import com.example.tabletop.image.exception.ImageProcessingException;
 import com.example.tabletop.menu.exception.InvalidMenuDataException;
@@ -117,8 +117,8 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(RefreshTokenException.class)
-    public ResponseEntity<?> handleRefreshTokenException(RefreshTokenException ex, WebRequest request) {
+    @ExceptionHandler(TokenException.class)
+    public ResponseEntity<?> handleRefreshTokenException(TokenException ex, WebRequest request) {
         ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), ex.getMessage(), request.getDescription(false));
         return new ResponseEntity<>(errorDetails, HttpStatus.UNAUTHORIZED);
     }
