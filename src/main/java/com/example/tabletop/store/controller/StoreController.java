@@ -23,9 +23,7 @@ import com.example.tabletop.store.dto.StoreRequestDTO;
 import com.example.tabletop.store.service.StoreService;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @RestController
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:3000")
@@ -122,18 +120,16 @@ public class StoreController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred");
 		}
 	}
-	
+		
 	// 가게 삭제
 	@DeleteMapping("api/stores/{storeId}")
-    public ResponseEntity<?> deleteStoreByStoreId(@PathVariable Long storeId) {
+    public ResponseEntity<String> deleteStoreByStoreId(@PathVariable Long storeId) {
         try {
         	storeService.deleteStoreByStoreId(storeId);
-        	log.info("api storeId", storeId);
-            return ResponseEntity.ok().build();
+        	return ResponseEntity.status(HttpStatus.OK).body("삭제 성공");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred");
         }
-        
     }
 	
 }
