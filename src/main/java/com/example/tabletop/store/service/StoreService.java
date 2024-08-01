@@ -170,19 +170,20 @@ public class StoreService {
 		
 		StoreDetailsDTO dto = entityToStoreDetailsDTO(store);
 		
-		
-		// 서버에 저장된 이미지 경로를 통해 base64파일로 변환하여 전달
-		Path filepath =  Paths.get(store.getImage().getFilepath());
-        if (Files.exists(filepath)) {
-            byte[] fileBytes = null;
-			try {
-				fileBytes = Files.readAllBytes(filepath);
-			} catch (IOException e) {
-				e.printStackTrace();
+		if(store.getImage() != null) {			
+			// 서버에 저장된 이미지 경로를 통해 base64파일로 변환하여 전달
+			Path filepath =  Paths.get(store.getImage().getFilepath());
+			if (Files.exists(filepath)) {
+				byte[] fileBytes = null;
+				try {
+					fileBytes = Files.readAllBytes(filepath);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				String base64File = Base64.getEncoder().encodeToString(fileBytes);
+				dto.setImageBase64(base64File);
 			}
-            String base64File = Base64.getEncoder().encodeToString(fileBytes);
-            dto.setImageBase64(base64File);
-        }
+		}
 		
 		return dto;
 	}
@@ -298,7 +299,6 @@ public class StoreService {
 							.closeTime(entity.getCloseTime())
 							.holidays(entity.getHolidays())
 							.sellerName(entity.getSeller().getUsername())
-							.imageFilePath(entity.getImage().getFilepath())
 							.build();
 		
 		return dto;

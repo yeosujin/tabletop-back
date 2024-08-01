@@ -24,13 +24,12 @@ public class StoreDetailsDTO {
     private LocalTime closeTime;
     private Set<String> holidays;
 	private String sellerName;
-	private String imageFilePath;
 	private String imageBase64;
     
     @Builder
     public StoreDetailsDTO(Long storeId, String name, StoreType storeType, String corporateRegistrationNumber,
     		LocalDate openDate, LocalDate closeDate, String description, String address, String notice,
-    		LocalTime openTime, LocalTime closeTime, Set<String> holidays, String sellerName, String imageFilePath, String imageBase64) {
+    		LocalTime openTime, LocalTime closeTime, Set<String> holidays, String sellerName, String imageBase64) {
 
     	this.storeId = storeId;
     	this.name = name;
@@ -45,7 +44,6 @@ public class StoreDetailsDTO {
     	this.closeTime = closeTime;
     	this.holidays = holidays;
     	this.sellerName = sellerName;
-    	this.imageFilePath = imageFilePath;
     	this.imageBase64 = imageBase64;
     }
     
