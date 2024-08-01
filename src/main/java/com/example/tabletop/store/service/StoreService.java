@@ -1,10 +1,21 @@
 package com.example.tabletop.store.service;
 
 import java.io.File;
+<<<<<<< Updated upstream
+=======
+import java.io.IOException;
+>>>>>>> Stashed changes
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+<<<<<<< Updated upstream
+=======
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Base64;
+>>>>>>> Stashed changes
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -41,7 +52,10 @@ public class StoreService {
 	private final SellerRepository sellerRepository;
 	private final ImageService imageService;
 	
+<<<<<<< Updated upstream
 	
+=======
+>>>>>>> Stashed changes
 	// loginId에 해당하는 모든 가게 조회
 	public List<StoreListResponseDTO> getStoreListByLoginId(String loginId) {
 		log.info("Fetching stores for login id: {}", loginId);
@@ -149,6 +163,10 @@ public class StoreService {
 		if (imageFile != null && !imageFile.isEmpty()) {
             Image image = imageService.saveImage(imageFile, storeEntity.getStoreId(), ImageParentType.STORE);
             storeEntity.setImage(image);
+<<<<<<< Updated upstream
+=======
+            storeRepository.save(storeEntity);
+>>>>>>> Stashed changes
         }
 		
 	}
@@ -156,13 +174,37 @@ public class StoreService {
 	// 가게 상세 정보 조회
 	public StoreDetailsDTO getStoreDetails(Long storeId) {
 		log.info("Fetching store with id: {}", storeId);
+<<<<<<< Updated upstream
+=======
+		
+>>>>>>> Stashed changes
 		Store store = storeRepository.findById(storeId)
 				.orElseThrow(() -> {
 					log.error("Store not found with id: {}", storeId);
 					return new EntityNotFoundException("Store not found with id: " + storeId);
 				});
 		
+<<<<<<< Updated upstream
 		return entityToStoreDetailsDTO(store);
+=======
+		StoreDetailsDTO dto = entityToStoreDetailsDTO(store);
+		
+		
+		// 서버에 저장된 이미지 경로를 통해 base64파일로 변환하여 전달
+		Path filepath =  Paths.get(store.getImage().getFilepath());
+        if (Files.exists(filepath)) {
+            byte[] fileBytes = null;
+			try {
+				fileBytes = Files.readAllBytes(filepath);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+            String base64File = Base64.getEncoder().encodeToString(fileBytes);
+            dto.setImageBase64(base64File);
+        }
+		
+		return dto;
+>>>>>>> Stashed changes
 	}
 	
 	// 가게 수정
@@ -276,6 +318,10 @@ public class StoreService {
 							.closeTime(entity.getCloseTime())
 							.holidays(entity.getHolidays())
 							.sellerName(entity.getSeller().getUsername())
+<<<<<<< Updated upstream
+=======
+							.imageFilePath(entity.getImage().getFilepath())
+>>>>>>> Stashed changes
 							.build();
 		
 		return dto;
