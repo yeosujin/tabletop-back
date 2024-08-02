@@ -29,7 +29,7 @@ public class StoreDetailsDTO {
     @Builder
     public StoreDetailsDTO(Long storeId, String name, StoreType storeType, String corporateRegistrationNumber,
     		LocalDate openDate, LocalDate closeDate, String description, String address, String notice,
-    		LocalTime openTime, LocalTime closeTime, Set<String> holidays, String sellerName, String imageBase64, String s3Url) {
+    		LocalTime openTime, LocalTime closeTime, Set<String> holidays, String sellerName, String s3Url) {
     	this.storeId = storeId;
     	this.name = name;
     	this.storeType = storeType;

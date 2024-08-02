@@ -15,6 +15,7 @@ public class KitchenOrderResponseDto {
     private List<KitchenOrderItemDto> orderItems;
     private LocalDateTime createdAt;
     private int status;
+    private String imp_uid;
 
     @Data
     @AllArgsConstructor
