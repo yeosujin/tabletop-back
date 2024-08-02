@@ -16,15 +16,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.example.tabletop.image.enums.ImageParentType;
-import com.example.tabletop.image.exception.ImageNotFoundException;
-import com.example.tabletop.image.exception.ImageProcessingException;
 import com.example.tabletop.menu.entity.Menu;
 import com.example.tabletop.menu.repository.MenuRepository;
 import com.example.tabletop.menuimage.entity.MenuImage;
+import com.example.tabletop.menuimage.exception.MenuImageProcessingException;
+import com.example.tabletop.menuimage.exception.MenuImageNotFoundException;
 import com.example.tabletop.menuimage.repository.MenuImageRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -48,7 +46,7 @@ public class MenuImageService {
     private final MenuRepository menuRepository;
 
     @Transactional
-    public MenuImage saveImage(MultipartFile file, Long menuId) throws ImageProcessingException, Exception {
+    public MenuImage saveImage(MultipartFile file, Long menuId) throws MenuImageProcessingException, Exception {
     	if(file == null) {
 			throw new Exception("파일 전달 오류 발생");
 		}
@@ -89,7 +87,7 @@ public class MenuImageService {
             return imageEntity;
         } catch (IOException e) {
             log.error("Failed to save image", e);
-            throw new ImageProcessingException("Failed to save image: " + e.getMessage());
+            throw new MenuImageProcessingException("Failed to save image: " + e.getMessage());
         } catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -103,7 +101,7 @@ public class MenuImageService {
         return menuImageRepository.findById(imageId)
                 .orElseThrow(() -> {
                     log.error("MenuImage not found with id: {}", imageId);
-                    return new ImageNotFoundException("MenuImage not found with id: " + imageId);
+                    return new MenuImageNotFoundException("MenuImage not found with id: " + imageId);
                 });
     }
 
@@ -114,7 +112,7 @@ public class MenuImageService {
     }
 
     @Transactional
-    public void deleteImage(Long imageId) throws ImageProcessingException {
+    public void deleteImage(Long imageId) throws MenuImageProcessingException {
         try {
             MenuImage image = getImage(imageId);
             // S3 에서 삭제하는 로직으로 변경
@@ -129,12 +127,12 @@ public class MenuImageService {
             log.info("Deleted image: {}", image.getFilename());
         } catch (SdkClientException e) {
             log.error("Failed to delete image", e);
-            throw new ImageProcessingException("Failed to delete image: " + e.getMessage());
+            throw new MenuImageProcessingException("Failed to delete image: " + e.getMessage());
         }
     }
 
     @Transactional(readOnly = true)
-    public byte[] getImageBytes(Long imageId) throws ImageProcessingException {
+    public byte[] getImageBytes(Long imageId) throws MenuImageProcessingException {
         try {
             MenuImage image = getImage(imageId);
             Path filepath = Paths.get(image.getFilepath());
@@ -142,7 +140,7 @@ public class MenuImageService {
             return Files.readAllBytes(filepath);
         } catch (IOException e) {
             log.error("Failed to read image bytes", e);
-            throw new ImageProcessingException("Failed to read image bytes: " + e.getMessage());
+            throw new MenuImageProcessingException("Failed to read image bytes: " + e.getMessage());
         }
     }
 }

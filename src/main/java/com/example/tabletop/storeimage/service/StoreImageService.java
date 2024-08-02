@@ -23,8 +23,8 @@ import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
-import com.example.tabletop.image.exception.ImageProcessingException;
 import com.example.tabletop.storeimage.entity.StoreImage;
+import com.example.tabletop.storeimage.exception.StoreImageProcessingException;
 import com.example.tabletop.storeimage.repository.StoreImageRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -84,7 +84,7 @@ public class StoreImageService {
             return savedImageEntity;
         } catch (IOException e) {
             log.error("Failed to save image", e);
-            throw new ImageProcessingException("Failed to save image: " + e.getMessage());
+            throw new StoreImageProcessingException("Failed to save image: " + e.getMessage());
         } catch (Exception e) {
 			e.printStackTrace();
 		}

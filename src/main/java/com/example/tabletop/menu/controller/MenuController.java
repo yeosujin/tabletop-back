@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.example.tabletop.image.enums.ImageParentType;
 import com.example.tabletop.menu.dto.MenuDTO;
 import com.example.tabletop.menu.entity.Menu;
 import com.example.tabletop.menu.exception.MenuNotFoundException;
