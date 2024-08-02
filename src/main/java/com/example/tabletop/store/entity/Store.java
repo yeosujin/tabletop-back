@@ -99,8 +99,9 @@ public class Store {
     @JoinColumn(name = "store_image_id")
     private StoreImage storeimage;
     
-    @OneToMany(mappedBy = "store", cascade = CascadeType.REMOVE)
-	private List<Menu> menus;
+    @OneToMany(mappedBy = "store", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JsonManagedReference
+    private List<Menu> menus;
     
     @OneToMany(mappedBy = "store", cascade = CascadeType.REMOVE)
 	private List<Order> orders;

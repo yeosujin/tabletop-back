@@ -5,8 +5,9 @@ import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.example.tabletop.image.entity.Image;
+import com.example.tabletop.menuimage.entity.MenuImage;
 import com.example.tabletop.store.entity.Store;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -62,9 +63,14 @@ public class Menu {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "store_id", nullable = false)
+    @JsonBackReference
     private Store store;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "image_id")
-    private Image image;
+    @JoinColumn(name = "menuimage_id")
+    private MenuImage menuImage;
+    
+    public String getMenuimageUrl() {
+        return menuImage != null ? menuImage.getS3Url() : null;
+    }
 }

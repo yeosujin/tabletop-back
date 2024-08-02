@@ -7,6 +7,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+
+import java.util.NoSuchElementException;
+
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,6 +35,8 @@ import com.example.tabletop.image.enums.ImageParentType;
 import com.example.tabletop.image.exception.ImageNotFoundException;
 import com.example.tabletop.image.exception.ImageProcessingException;
 import com.example.tabletop.image.repository.ImageRepository;
+import com.example.tabletop.menu.entity.Menu;
+import com.example.tabletop.menu.repository.MenuRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,16 +56,20 @@ public class ImageService {
 	
 	private final AmazonS3 amazonS3;
     private final ImageRepository imageRepository;
+    private final MenuRepository menuRepository;
 
     @Transactional
     public Image saveImage(MultipartFile file, Long parentId, ImageParentType parentType) throws Exception {
     	if(file == null) {
 			throw new Exception("파일 전달 오류 발생");
 		}
-		
 		if(parentType == ImageParentType.STORE) {
 			STORE_DIR_NAME = parentId.toString();
-		}
+		} else if (parentType == ImageParentType.MENU) {
+	        Menu menu = menuRepository.findById(parentId)
+	                .orElseThrow(() -> new NoSuchElementException("Menu not found"));
+	        STORE_DIR_NAME = menu.getStore().getStoreId().toString();
+	    }
 			
         try {
         	log.info("Saving image entity");
@@ -75,7 +84,7 @@ public class ImageService {
 					.filepath("C:\\tabletop")
 					.S3Url(STORE_DIR_NAME + "/" + filename) 
 					.build();
-           
+
             Image savedImageEntity = imageRepository.save(imageEntity);
     		if(savedImageEntity.getImageId() != null) {
     			log.info("Saving image to S3");

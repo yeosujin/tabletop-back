@@ -42,7 +42,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/stores/*/menus", "/api/stores/*", "/api/stores/*/details").permitAll()
                         .requestMatchers("/api/orders/").permitAll()
                         .requestMatchers("/api/auth/login", "/api/auth/{loginId}", "/api/auth/token/refresh").permitAll()
-                        .requestMatchers("/api/mail/**", "/api/s3/**").permitAll()
+                        .requestMatchers("/api/mail/**", "/api/s3/**", "/api/store/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 
