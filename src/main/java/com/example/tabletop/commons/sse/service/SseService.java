@@ -24,7 +24,7 @@ public class SseService {
         return storeOrderSinks.computeIfAbsent(storeId, k -> Sinks.many().multicast().onBackpressureBuffer())
                 .asFlux()
                 .doOnNext(order -> log.info("주문 스트리밍: storeId={}, order={}", storeId, order))
-                .doOnComplete(() -> log.info("SSE 연결 종료: storeId={}", storeId));
+                .doOnComplete(() ->log.info("SSE connection cancelled for store ID: {}", storeId));
     }
 
     public Mono<Void> notifyNewOrder(Long storeId, KitchenOrderResponseDto order) {
@@ -33,5 +33,10 @@ public class SseService {
             storeOrderSinks.computeIfAbsent(storeId, k -> Sinks.many().multicast().onBackpressureBuffer())
                     .tryEmitNext(order);
         });
+    }
+
+    public void removeOrderStream(Long storeId) {
+        storeOrderSinks.get(storeId).tryEmitComplete();
+        storeOrderSinks.remove(storeId);
     }
 }

@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.tabletop.image.entity.Image;
 import com.example.tabletop.image.enums.ImageParentType;
+import com.example.tabletop.image.exception.ImageProcessingException;
 import com.example.tabletop.image.service.ImageService;
 import com.example.tabletop.menu.entity.Menu;
 import com.example.tabletop.menu.exception.MenuNotFoundException;
@@ -53,7 +54,7 @@ public class MenuService {
     }
 
     @Transactional
-    public Menu createMenu(Long storeId, String name, Integer price, String description, Boolean isAvailable, MultipartFile imageFile) throws IOException {
+    public Menu createMenu(Long storeId, String name, Integer price, String description, Boolean isAvailable, MultipartFile imageFile) throws ImageProcessingException, Exception {
         log.info("Creating new menu for store id: {}", storeId);
         if (name == null || name.trim().isEmpty()) {
             log.error("Attempt to create menu with null or empty name");
@@ -85,7 +86,7 @@ public class MenuService {
 
 
     @Transactional
-    public Menu updateMenu(Long storeId, Long menuId, String name, Integer price, String description, Boolean isAvailable, MultipartFile imageFile) throws IOException {
+    public Menu updateMenu(Long storeId, Long menuId, String name, Integer price, String description, Boolean isAvailable, MultipartFile imageFile) throws ImageProcessingException, Exception {
         log.info("Updating menu with id: {} for store id: {}", menuId, storeId);
         Menu menu = menuRepository.findById(menuId)
                 .orElseThrow(() -> {
