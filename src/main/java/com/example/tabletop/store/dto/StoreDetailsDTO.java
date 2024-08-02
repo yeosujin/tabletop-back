@@ -41,6 +41,7 @@ public class StoreDetailsDTO {
     public StoreDetailsDTO(Long storeId, String name, StoreType storeType, String corporateRegistrationNumber,
     		LocalDate openDate, LocalDate closeDate, String description, String address, String notice,
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     		LocalTime openTime, LocalTime closeTime, Set<String> holidays, String sellerName, String imageBase64) {
 
 =======
@@ -50,6 +51,9 @@ public class StoreDetailsDTO {
 =======
     		LocalTime openTime, LocalTime closeTime, Set<String> holidays, String sellerName, String imageBase64, String s3Url) {
 >>>>>>> Stashed changes
+>>>>>>> Stashed changes
+=======
+    		LocalTime openTime, LocalTime closeTime, Set<String> holidays, String sellerName, String s3Url) {
 >>>>>>> Stashed changes
     	this.storeId = storeId;
     	this.name = name;
