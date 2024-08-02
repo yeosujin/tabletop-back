@@ -15,6 +15,7 @@ import com.example.tabletop.menu.entity.Menu;
 import com.example.tabletop.order.entity.Order;
 import com.example.tabletop.seller.entity.Seller;
 import com.example.tabletop.store.enums.StoreType;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -102,8 +103,9 @@ public class Store {
     @JoinColumn(name = "image_id")
     private Image image;
     
-    @OneToMany(mappedBy = "store", cascade = CascadeType.REMOVE)
-	private List<Menu> menus;
+    @OneToMany(mappedBy = "store", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JsonManagedReference
+    private List<Menu> menus;
     
     @OneToMany(mappedBy = "store", cascade = CascadeType.REMOVE)
 	private List<Order> orders;

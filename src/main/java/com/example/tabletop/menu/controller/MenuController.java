@@ -19,11 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.tabletop.image.enums.ImageParentType;
-import com.example.tabletop.image.service.ImageService;
 import com.example.tabletop.menu.dto.MenuDTO;
 import com.example.tabletop.menu.entity.Menu;
 import com.example.tabletop.menu.exception.MenuNotFoundException;
 import com.example.tabletop.menu.service.MenuService;
+import com.example.tabletop.menuimage.service.MenuImageService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class MenuController {
     private final MenuService menuService;
-    private final ImageService imageService;
+    private final MenuImageService imageService;
 
     // 메뉴 조회
     @GetMapping()
@@ -50,10 +50,10 @@ public class MenuController {
     }
 
     // 메뉴 등록
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping
     public ResponseEntity<MenuDTO> createMenu(
             @PathVariable Long storeId,
-            @RequestPart("menuData") MenuDTO menuDTO,
+            @RequestPart(name = "menuData") MenuDTO menuDTO,
             @RequestPart(value = "image", required = false) MultipartFile image) {
         try {
         	Menu newMenu = menuService.createMenu(
@@ -64,11 +64,11 @@ public class MenuController {
                     menuDTO.getIsAvailable(),
                     image
             );
-
+        	
             // S3 image upload
-            if (image != null) {
-                imageService.saveImage(image, storeId, ImageParentType.MENU);
-            }
+//            if (image != null) {
+//                imageService.saveImage(image, newMenu.getId());
+//            }
 
             return new ResponseEntity<>(convertToDTO(newMenu), HttpStatus.CREATED);
         } catch (IOException e) {
@@ -97,7 +97,7 @@ public class MenuController {
 
             // S3 image upload
             if (image != null) {
-                imageService.saveImage(image, menuId, ImageParentType.MENU);
+                imageService.saveImage(image, menuId);
             }
 
             return ResponseEntity.ok(convertToDTO(updatedMenu));
@@ -110,7 +110,7 @@ public class MenuController {
     @DeleteMapping("/{menuId}")
     public ResponseEntity<?> deleteMenu(@PathVariable Long storeId, @PathVariable Long menuId) {
         try {
-            menuService.deleteMenu(storeId, menuId);
+            menuService.deleteMenu(menuId);
             return ResponseEntity.noContent().build();
         } catch (MenuNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
@@ -135,6 +135,7 @@ public class MenuController {
         dto.setPrice(menu.getPrice());
         dto.setDescription(menu.getDescription());
         dto.setIsAvailable(menu.getIsAvailable());
+        dto.setS3MenuUrl(menu.getMenuImage().getS3Url());
         return dto;
     }
 }

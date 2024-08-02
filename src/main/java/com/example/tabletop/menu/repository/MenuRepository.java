@@ -19,13 +19,9 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
     void deleteByStore_StoreId(Long storeId);
 
     // 무한 스크롤을 위한 커서 기반 쿼리
-    @Query("SELECT m FROM Menu m WHERE m.store.storeId = :storeId AND m.id > :lastMenuId ORDER BY m.id ASC")
-    List<Menu> findMenusForInfiniteScroll(@Param("storeId") Long storeId,
-                                          @Param("lastMenuId") Long lastMenuId,
-                                          Pageable pageable);
+    @Query("SELECT m FROM Menu m JOIN FETCH m.store WHERE m.store.storeId = :storeId AND m.id < :lastMenuId ORDER BY m.id DESC")
+    List<Menu> findMenusForInfiniteScroll(@Param("storeId") Long storeId, @Param("lastMenuId") Long lastMenuId, Pageable pageable);
 
-    // 첫 페이지 로딩을 위한 쿼리 (lastMenuId가 null일 때 사용)
-    @Query("SELECT m FROM Menu m WHERE m.store.storeId = :storeId ORDER BY m.id ASC")
-    List<Menu> findInitialMenusForInfiniteScroll(@Param("storeId") Long storeId,
-                                                 Pageable pageable);
+    @Query("SELECT m FROM Menu m JOIN FETCH m.store WHERE m.store.storeId = :storeId ORDER BY m.id DESC")
+    List<Menu> findInitialMenusForInfiniteScroll(@Param("storeId") Long storeId, Pageable pageable);
 }
