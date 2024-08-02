@@ -1,5 +1,6 @@
 package com.example.tabletop.store.service;
 
+
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -18,7 +19,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.example.tabletop.image.exception.ImageProcessingException;
 import com.example.tabletop.image.entity.Image;
 import com.example.tabletop.image.enums.ImageParentType;
 import com.example.tabletop.image.service.ImageService;
@@ -156,8 +156,6 @@ public class StoreService {
 				imageEntity = imageService.saveImage(imageFile, storeEntity.getStoreId(), ImageParentType.STORE);
 				storeEntity.setImage(imageEntity);
 				storeRepository.save(storeEntity);
-			} catch (ImageProcessingException e) {
-				e.printStackTrace();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -223,14 +221,20 @@ public class StoreService {
 								parsedCloseTime,
 								holidaySet);
 		
-		// 이미지 변경 - 삭제되어 없거나 바뀌었거나,,, 삭제 어떻게????
+		// 이미지 변경 - 삭제먼저 하고 등록
 		if (imageFile != null && !imageFile.isEmpty()) {
+			if(storeEntity.getImage() != null) {
+				try {
+					imageService.deleteImageFromS3(storeEntity.getImage().getImageId());
+				} catch (Exception e) {
+					log.info("Error - ", e);
+				}
+			}
+			
             Image imageEntity;
 			try {
 				imageEntity = imageService.saveImage(imageFile, storeEntity.getStoreId(), ImageParentType.STORE);
 				storeEntity.setImage(imageEntity);
-			} catch (ImageProcessingException e) {
-				e.printStackTrace();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -250,33 +254,39 @@ public class StoreService {
 					return new EntityNotFoundException("Store not found with id: " + storeId);
 				});
 		
-		// 가게의 이미지파일 폴더 삭제(가게 이미지 + 메뉴 이미지)
-		String storeDir = saveDir + File.separator + storeId.toString();
-		File directory = new File(storeDir);
-		if (directory.exists()) {
-			File[] files = directory.listFiles();
-			
-			for(File file: files) {
-				file.delete();
-			}
-				
-			directory.delete();
+		// 가게의 이미지파일 폴더(s3 객체) 삭제
+		try {
+			imageService.deleteFolderFromS3(storeId);
+		} catch (Exception e) {
+			log.info("error occured while trying to delete imagefile folder from s3");
 		}
 
 		// store의 레코드 삭제 시, cascade로 image, menu, orders(?) 레코드 같이 삭제
 		storeRepository.delete(storeEntity);
 		
-		log.info("Deleted menu with id: {}", storeId);
+		log.info("Deleted store with id: {}", storeId);
 	}
 		
 	// Entity -> StoreListResponseDTO
 	public StoreListResponseDTO entityToStoreListResponseDTO(Store entity) {
 		
-		StoreListResponseDTO dto = StoreListResponseDTO.builder()
-							.storeId(entity.getStoreId())
-							.name(entity.getName())
-							.storeType(entity.getStoreType())
-							.build();
+		StoreListResponseDTO dto = null;
+		
+		if(entity.getImage() != null) {
+			dto = StoreListResponseDTO.builder()
+					.storeId(entity.getStoreId())
+					.name(entity.getName())
+					.storeType(entity.getStoreType())
+					.s3Url(entity.getImage().getS3Url())
+					.build();
+		} else {
+			dto = StoreListResponseDTO.builder()
+					.storeId(entity.getStoreId())
+					.name(entity.getName())
+					.storeType(entity.getStoreType())
+					.build();
+		}
+			
 		
 		return dto;
 	}
@@ -284,7 +294,11 @@ public class StoreService {
 	// Entity -> StoreDetailsDTO
 	public StoreDetailsDTO entityToStoreDetailsDTO(Store entity) {
 		
-		StoreDetailsDTO dto = StoreDetailsDTO.builder()
+		StoreDetailsDTO dto = null;
+		
+		if(entity.getImage() != null) {
+		
+			dto = StoreDetailsDTO.builder()
 							.storeId(entity.getStoreId())
 							.name(entity.getName())
 							.storeType(entity.getStoreType())
@@ -300,6 +314,23 @@ public class StoreService {
 							.sellerName(entity.getSeller().getUsername())
 							.s3Url(entity.getImage().getS3Url())
 							.build();
+		} else {
+			dto = StoreDetailsDTO.builder()
+					.storeId(entity.getStoreId())
+					.name(entity.getName())
+					.storeType(entity.getStoreType())
+					.corporateRegistrationNumber(entity.getCorporateRegistrationNumber())
+					.openDate(entity.getOpenDate())
+					.closeDate(entity.getCloseDate())
+					.description(entity.getDescription())
+					.address(entity.getAddress())
+					.notice(entity.getNotice())
+					.openTime(entity.getOpenTime())
+					.closeTime(entity.getCloseTime())
+					.holidays(entity.getHolidays())
+					.sellerName(entity.getSeller().getUsername())
+					.build();
+		}
 		
 		return dto;
 	}

@@ -34,14 +34,11 @@ import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.ToString;
 
 @NoArgsConstructor
-@Setter
 @Getter
 @Table(name = "store")
-@ToString
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 public class Store {
