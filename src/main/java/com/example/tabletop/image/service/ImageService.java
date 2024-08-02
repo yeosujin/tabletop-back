@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -13,9 +15,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
+import com.amazonaws.services.s3.model.DeleteObjectsRequest;
+import com.amazonaws.services.s3.model.DeleteObjectsResult;
+import com.amazonaws.services.s3.model.ListObjectsV2Request;
+import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.example.tabletop.image.entity.Image;
 import com.example.tabletop.image.enums.ImageParentType;
 import com.example.tabletop.image.exception.ImageNotFoundException;
@@ -42,7 +53,7 @@ public class ImageService {
     private final ImageRepository imageRepository;
 
     @Transactional
-    public Image saveImage(MultipartFile file, Long parentId, ImageParentType parentType) throws ImageProcessingException, Exception {
+    public Image saveImage(MultipartFile file, Long parentId, ImageParentType parentType) throws Exception {
     	if(file == null) {
 			throw new Exception("파일 전달 오류 발생");
 		}
@@ -107,16 +118,70 @@ public class ImageService {
     }
 
     @Transactional
-    public void deleteImage(Long imageId) throws ImageProcessingException {
+    public void deleteFolderFromS3(Long storeId) throws Exception {
+    	String folderKey = S3_NAME + "/" + storeId.toString();
+
         try {
-            Image image = getImage(imageId);
-            Path filepath = Paths.get(image.getFilepath());
-            Files.deleteIfExists(filepath);
-            imageRepository.delete(image);
-            log.info("Deleted image: {}", image.getFilename());
-        } catch (IOException e) {
+            // 1. 리스트 요청을 통해 폴더 내부의 객체 목록을 가져옴
+            ListObjectsV2Request listObjectsV2Request = new ListObjectsV2Request()
+                .withBucketName(bucketName)
+                .withPrefix(folderKey);
+
+            List<S3ObjectSummary> objectSummaries = new ArrayList<>();
+            ListObjectsV2Result result;
+
+            do {
+                result = amazonS3.listObjectsV2(listObjectsV2Request);
+                objectSummaries.addAll(result.getObjectSummaries());
+                listObjectsV2Request.setContinuationToken(result.getNextContinuationToken());
+            } while (result.isTruncated());
+
+            // 2. 객체가 없으면 바로 리턴
+            if (objectSummaries.isEmpty()) {
+                return;
+            }
+
+            // 3. 삭제 요청 객체를 만듦
+            DeleteObjectsRequest deleteObjectsRequest = new DeleteObjectsRequest(bucketName)
+                .withKeys(objectSummaries.stream().map(S3ObjectSummary::getKey).toArray(String[]::new));
+
+            // 4. 객체 삭제
+            DeleteObjectsResult deleteObjectsResult = amazonS3.deleteObjects(deleteObjectsRequest);
+            int deletedCount = deleteObjectsResult.getDeletedObjects().size();
+            log.info("Deleted " + deletedCount + " objects from S3 folder: " + folderKey);
+        } catch (AmazonServiceException e) {
+            log.error("Failed to delete S3 folder", e);
+            throw new Exception("Failed to delete S3 folder: " + e.getMessage());
+        } catch (SdkClientException e) {
+            log.error("Failed to delete S3 folder", e);
+            throw new Exception("Failed to delete S3 folder: " + e.getMessage());
+        }
+    }
+    
+    @Transactional
+    public void deleteImageFromS3(Long imageId) throws Exception {
+    	try {
+            // 1. 데이터베이스에서 이미지 엔티티 조회
+            Optional<Image> imageEntityOptional = imageRepository.findById(imageId);
+            if (!imageEntityOptional.isPresent()) {
+                throw new Exception("이미지를 찾을 수 없습니다.");
+            }
+            Image imageEntity = imageEntityOptional.get();
+
+            // 2. S3에서 이미지 삭제
+            String s3Key = S3_NAME + "/" + imageEntity.getS3Url();
+            log.info("Deleting image from S3: " + s3Key);
+            amazonS3.deleteObject(new DeleteObjectRequest(bucketName, s3Key));
+
+            // 3. 데이터베이스에서 이미지 엔티티 삭제
+            log.info("Deleting image entity from database");
+            imageRepository.delete(imageEntity);
+        } catch (AmazonServiceException e) {
+            log.error("Failed to delete image from S3", e);
+            throw new Exception("Failed to delete image from S3: " + e.getMessage());
+        } catch (Exception e) {
             log.error("Failed to delete image", e);
-            throw new ImageProcessingException("Failed to delete image: " + e.getMessage());
+            throw new Exception("Failed to delete image: " + e.getMessage());
         }
     }
 
