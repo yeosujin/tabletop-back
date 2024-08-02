@@ -1,27 +1,17 @@
 package com.example.tabletop.store.service;
 
-
-import java.io.File;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.example.tabletop.image.entity.Image;
-import com.example.tabletop.image.enums.ImageParentType;
-import com.example.tabletop.image.service.ImageService;
 import com.example.tabletop.seller.entity.Seller;
 import com.example.tabletop.seller.repository.SellerRepository;
 import com.example.tabletop.store.dto.StoreDetailsDTO;
@@ -29,6 +19,8 @@ import com.example.tabletop.store.dto.StoreListResponseDTO;
 import com.example.tabletop.store.entity.Store;
 import com.example.tabletop.store.enums.StoreType;
 import com.example.tabletop.store.repository.StoreRepository;
+import com.example.tabletop.storeimage.entity.StoreImage;
+import com.example.tabletop.storeimage.service.StoreImageService;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -39,12 +31,10 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 public class StoreService {
-	@Value("${store.files.save.dir}")
-	String saveDir;
 	
 	private final StoreRepository storeRepository;
 	private final SellerRepository sellerRepository;
-	private final ImageService imageService;
+	private final StoreImageService storeImageService;
 	
 	// loginId에 해당하는 모든 가게 조회
 	public List<StoreListResponseDTO> getStoreListByLoginId(String loginId) {
@@ -151,10 +141,10 @@ public class StoreService {
 		log.info("Created new store with id: {} for login id: {}", storeEntity.getStoreId(), loginId);
 		
 		if (imageFile != null && !imageFile.isEmpty()) {
-            Image imageEntity;
+            StoreImage imageEntity;
 			try {
-				imageEntity = imageService.saveImage(imageFile, storeEntity.getStoreId(), ImageParentType.STORE);
-				storeEntity.setImage(imageEntity);
+				imageEntity = storeImageService.saveImage(storeEntity.getStoreId(), imageFile);
+				storeEntity.setStoreImage(imageEntity);
 				storeRepository.save(storeEntity);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -223,21 +213,33 @@ public class StoreService {
 		
 		// 이미지 변경 - 삭제먼저 하고 등록
 		if (imageFile != null && !imageFile.isEmpty()) {
-			if(storeEntity.getImage() != null) {
+			if(storeEntity.getStoreimage() != null) {
 				try {
-					imageService.deleteImageFromS3(storeEntity.getImage().getImageId());
+					storeImageService.deleteImageFromS3(storeEntity.getStoreimage().getStoreImageId());
 				} catch (Exception e) {
 					log.info("Error - ", e);
 				}
 			}
 			
-            Image imageEntity;
+            StoreImage imageEntity;
 			try {
-				imageEntity = imageService.saveImage(imageFile, storeEntity.getStoreId(), ImageParentType.STORE);
-				storeEntity.setImage(imageEntity);
+				imageEntity = storeImageService.saveImage(storeEntity.getStoreId(), imageFile);
+				storeEntity.setStoreImage(imageEntity);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+        } 
+		if (imageFile == null) {
+			log.info("가게 수정 시 이미지를 삭제하고 제출했을 떄:시작");
+			if(storeEntity.getStoreimage() != null) {
+				try {
+					storeImageService.deleteImageFromS3(storeEntity.getStoreimage().getStoreImageId());
+				} catch (Exception e) {
+					log.info("Error - ", e);
+				}
+			}
+			storeEntity.setStoreImage(null);
+			log.info("가게 수정 시 이미지를 삭제하고 제출했을 떄:끝");
         }
 		
 		storeRepository.save(storeEntity);
@@ -256,7 +258,7 @@ public class StoreService {
 		
 		// 가게의 이미지파일 폴더(s3 객체) 삭제
 		try {
-			imageService.deleteFolderFromS3(storeId);
+			storeImageService.deleteFolderFromS3(storeId);
 		} catch (Exception e) {
 			log.info("error occured while trying to delete imagefile folder from s3");
 		}
@@ -272,12 +274,12 @@ public class StoreService {
 		
 		StoreListResponseDTO dto = null;
 		
-		if(entity.getImage() != null) {
+		if(entity.getStoreimage() != null) {
 			dto = StoreListResponseDTO.builder()
 					.storeId(entity.getStoreId())
 					.name(entity.getName())
 					.storeType(entity.getStoreType())
-					.s3Url(entity.getImage().getS3Url())
+					.s3Url(entity.getStoreimage().getS3Url())
 					.build();
 		} else {
 			dto = StoreListResponseDTO.builder()
@@ -296,7 +298,7 @@ public class StoreService {
 		
 		StoreDetailsDTO dto = null;
 		
-		if(entity.getImage() != null) {
+		if(entity.getStoreimage() != null) {
 		
 			dto = StoreDetailsDTO.builder()
 							.storeId(entity.getStoreId())
@@ -312,7 +314,7 @@ public class StoreService {
 							.closeTime(entity.getCloseTime())
 							.holidays(entity.getHolidays())
 							.sellerName(entity.getSeller().getUsername())
-							.s3Url(entity.getImage().getS3Url())
+							.s3Url(entity.getStoreimage().getS3Url())
 							.build();
 		} else {
 			dto = StoreDetailsDTO.builder()

@@ -10,11 +10,11 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import com.example.tabletop.image.entity.Image;
 import com.example.tabletop.menu.entity.Menu;
 import com.example.tabletop.order.entity.Order;
 import com.example.tabletop.seller.entity.Seller;
 import com.example.tabletop.store.enums.StoreType;
+import com.example.tabletop.storeimage.entity.StoreImage;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -96,8 +96,8 @@ public class Store {
 
     @ToString.Exclude
     @OneToOne(cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "image_id")
-    private Image image;
+    @JoinColumn(name = "store_image_id")
+    private StoreImage storeimage;
     
     @OneToMany(mappedBy = "store", cascade = CascadeType.REMOVE)
 	private List<Menu> menus;
@@ -135,7 +135,7 @@ public class Store {
 		this.holidays = holidays;
     }
     
-    public void setImage(Image image) {
-        this.image = image;
+    public void setStoreImage(StoreImage storeimage) {
+        this.storeimage = storeimage;
     }
 }
