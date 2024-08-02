@@ -49,7 +49,7 @@ public class MenuController {
     }
 
     // 메뉴 등록
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<MenuDTO> createMenu(
             @PathVariable Long storeId,
             @RequestPart(name = "menuData") MenuDTO menuDTO,
@@ -78,14 +78,15 @@ public class MenuController {
     }
 
     // 메뉴 수정
-    @PutMapping(value = "/{menuId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "/{menuId}")
     public ResponseEntity<?> updateMenu(
             @PathVariable Long menuId,
             @RequestPart("menuData") MenuDTO menuDTO,
             @RequestPart(value = "image", required = false) MultipartFile image) {
         try {
+        	
             Menu updatedMenu = menuService.updateMenu(
-                    menuDTO.getStoreId(),
+            		menuDTO.getStoreId(),
                     menuId,
                     menuDTO.getName(),
                     menuDTO.getPrice(),
@@ -94,10 +95,10 @@ public class MenuController {
                     image
             );
 
-            // S3 image upload
-            if (image != null) {
-                imageService.saveImage(image, menuId);
-            }
+//            // S3 image upload
+//            if (image != null) {
+//                imageService.saveImage(image, menuId);
+//            }
 
             return ResponseEntity.ok(convertToDTO(updatedMenu));
         } catch (Exception e) {

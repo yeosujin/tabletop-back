@@ -64,7 +64,7 @@ public class MenuImageService {
 					.filename(filename)
 					.fileOriginalName(file.getOriginalFilename())
 					.filepath("C:\\tabletop")
-					.S3Url("https://tabletop-tabletop.s3.ap-northeast-2.amazonaws.com/" + bucketName + "/" + MENU_DIR_NAME + "/" + filename) 
+					.S3Url("https://tabletop-tabletop.s3.ap-northeast-2.amazonaws.com/" + S3_NAME + "/menu/" + MENU_DIR_NAME + "/" + filename) 
 					.build();
 
             Long savedImageId = menuImageRepository.save(imageEntity).getMenuImageId();

@@ -85,8 +85,8 @@ public class MenuService {
 
 
     @Transactional
-    public Menu updateMenu(Long menuId, Long menuImageId, String name, Integer price, String description, Boolean isAvailable, MultipartFile imageFile) throws MenuImageProcessingException, Exception {
-        log.info("Updating menu with id: {} for menuImage id: {}", menuId, menuImageId);
+    public Menu updateMenu(Long storeId, Long menuId, String name, Integer price, String description, Boolean isAvailable, MultipartFile imageFile) throws MenuImageProcessingException, Exception {
+        log.info("Updating menu with id: {} for menuImage id: {}", menuId);
         Menu menu = menuRepository.findById(menuId)
                 .orElseThrow(() -> {
                     log.error("Menu not found with id: {}", menuId);
