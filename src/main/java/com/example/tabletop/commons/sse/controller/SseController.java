@@ -26,13 +26,18 @@ import java.util.List;
 public class SseController {
     private final SseService sseService;
 
-    @GetMapping(value = "/orders/{storeId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<KitchenOrderResponseDto> streamOrders(@PathVariable Long storeId) {
+    @GetMapping(value = "/orders/subscribe/{storeId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ServerSentEvent<KitchenOrderResponseDto>> streamOrders(@PathVariable Long storeId) {
         log.info("SSE connection established for store ID: {}", storeId);
         return sseService.getOrderStream(storeId)
-                .doOnNext(order -> log.info("Sending order: {}", order))
-                .doOnError(error -> log.error("Error in SSE stream", error))
-                .doOnComplete(() -> log.info("SSE stream completed for store ID: {}", storeId));
+                .map(order -> ServerSentEvent.<KitchenOrderResponseDto>builder()
+                        .data(order)
+                        .build());
+    }
+
+    @GetMapping(value = "/orders/unsubscribe/{storeId}")
+    public void unsubscribe(@PathVariable Long storeId) {
+        sseService.removeOrderStream(storeId);
     }
 
     @PostMapping("/notify/{storeId}")
