@@ -15,6 +15,7 @@ import com.example.tabletop.order.entity.Order;
 import com.example.tabletop.seller.entity.Seller;
 import com.example.tabletop.store.enums.StoreType;
 import com.example.tabletop.storeimage.entity.StoreImage;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
