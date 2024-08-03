@@ -19,7 +19,7 @@ import com.example.tabletop.menu.repository.MenuRepository;
 import com.example.tabletop.menu.service.MenuService;
 import com.example.tabletop.store.entity.Store;
 import com.example.tabletop.store.repository.StoreRepository;
-import com.example.tabletop.image.service.ImageService;
+import com.example.tabletop.menuimage.service.MenuImageService;
 
 public class MenuServiceTest {
 
@@ -30,7 +30,7 @@ public class MenuServiceTest {
     private StoreRepository storeRepository;
 
     @Mock
-    private ImageService imageService;
+    private MenuImageService imageService;
 
     @InjectMocks
     private MenuService menuService;
