@@ -11,5 +11,6 @@ import com.example.tabletop.seller.entity.Seller;
 public interface SellerRepository extends JpaRepository<Seller, Long> {
 
 	Optional<Seller> findByLoginId(String loginId);
-	Optional<Seller> findByLoginIdAndUsernameAndMobile(String loginId, String username, String mobile);
+	Optional<Seller> findByLoginIdAndEmailAndMobile(String loginId, String email, String mobile);
+	Optional<Seller> findByRefreshToken(String refreshToken);
 }

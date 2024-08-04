@@ -1,15 +1,12 @@
-package com.example.tabletop.image.entity;
-
-import com.example.tabletop.image.enums.ImageParentType;
+package com.example.tabletop.menuimage.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -18,19 +15,16 @@ import lombok.ToString;
 @Getter
 @ToString
 @Entity
-public class Image {
+public class MenuImage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "image_id")
-    private Long imageId;
+    @Column(name = "menuimage_id")
+    private Long menuImageId;
 
-    @Column(name = "parent_id", nullable = false)
-    private Long parentId;
+    @Column(name = "menu_id", nullable = false)
+    private Long menuId;
 
-    @Column(name = "parent_type", nullable = false)
-    @Enumerated(EnumType.ORDINAL)
-    private ImageParentType parentType;
-
+    // UUID + fileOriginalName
     @Column(name = "filename", nullable = false)
     private String filename;
 
@@ -39,14 +33,18 @@ public class Image {
     
     @Column(name = "filepath", nullable = false)
     private String filepath;
-
-    // 모든 필드를 초기화하는 생성자
-    public Image(Long parentId, ImageParentType parentType, String filename, String fileOriginalName, String filepath) {
-        this.parentId = parentId;
-        this.parentType = parentType;
+    
+    @Column(name = "s3_url", nullable = false)
+    private String S3Url;
+    
+    @Builder
+    public MenuImage(Long menuImageId, Long menuId, String filename, String fileOriginalName, String filepath, String S3Url) {
+        this.menuImageId = menuImageId;
+        this.menuId = menuId;
         this.filename = filename;
         this.fileOriginalName = fileOriginalName;
         this.filepath = filepath;
+        this.S3Url = S3Url;
     }
 
 }

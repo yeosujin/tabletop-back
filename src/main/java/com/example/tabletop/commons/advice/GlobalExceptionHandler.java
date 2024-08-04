@@ -6,17 +6,19 @@ import java.util.NoSuchElementException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
 import com.example.tabletop.auth.exception.CertificationGenerationException;
 import com.example.tabletop.auth.exception.CustomMessagingException;
 import com.example.tabletop.auth.exception.InvalidPasswordException;
 import com.example.tabletop.auth.exception.LogoutException;
-import com.example.tabletop.auth.exception.RefreshTokenException;
-import com.example.tabletop.image.exception.ImageNotFoundException;
-import com.example.tabletop.image.exception.ImageProcessingException;
+import com.example.tabletop.auth.exception.TokenException;
+import com.example.tabletop.storeimage.exception.StoreImageNotFoundException;
+import com.example.tabletop.storeimage.exception.StoreImageProcessingException;
+import com.example.tabletop.menuimage.exception.MenuImageNotFoundException;
+import com.example.tabletop.menuimage.exception.MenuImageProcessingException;
 import com.example.tabletop.menu.exception.InvalidMenuDataException;
 import com.example.tabletop.menu.exception.MenuNotFoundException;
 import com.example.tabletop.seller.exception.DuplicateLoginIdException;
@@ -24,7 +26,7 @@ import com.example.tabletop.seller.exception.InvalidSellerDataException;
 import com.example.tabletop.seller.exception.SellerNotFoundException;
 import com.example.tabletop.store.exception.StoreNotFoundException;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(StoreNotFoundException.class)
@@ -45,14 +47,26 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(ImageNotFoundException.class)
-    public ResponseEntity<?> handleImageNotFoundException(ImageNotFoundException ex, WebRequest request) {
+    @ExceptionHandler(StoreImageNotFoundException.class)
+    public ResponseEntity<?> handleImageNotFoundException(StoreImageNotFoundException ex, WebRequest request) {
         ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), ex.getMessage(), request.getDescription(false));
         return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
     }
     
-    @ExceptionHandler(ImageProcessingException.class)
-    public ResponseEntity<?> handleImageProcessingException(ImageProcessingException ex, WebRequest request) {
+    @ExceptionHandler(StoreImageProcessingException.class)
+    public ResponseEntity<?> handleImageProcessingException(StoreImageProcessingException ex, WebRequest request) {
+        ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), ex.getMessage(), request.getDescription(false));
+        return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    
+    @ExceptionHandler(MenuImageNotFoundException.class)
+    public ResponseEntity<?> handleImageNotFoundException(MenuImageNotFoundException ex, WebRequest request) {
+        ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), ex.getMessage(), request.getDescription(false));
+        return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
+    }
+    
+    @ExceptionHandler(MenuImageProcessingException.class)
+    public ResponseEntity<?> handleImageProcessingException(MenuImageProcessingException ex, WebRequest request) {
         ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), ex.getMessage(), request.getDescription(false));
         return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -117,8 +131,8 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(RefreshTokenException.class)
-    public ResponseEntity<?> handleRefreshTokenException(RefreshTokenException ex, WebRequest request) {
+    @ExceptionHandler(TokenException.class)
+    public ResponseEntity<?> handleRefreshTokenException(TokenException ex, WebRequest request) {
         ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), ex.getMessage(), request.getDescription(false));
         return new ResponseEntity<>(errorDetails, HttpStatus.UNAUTHORIZED);
     }
