@@ -94,7 +94,7 @@ public class MenuService {
                 });
 
         // 메뉴가 해당 스토어에 속하는지 확인
-        if (!menu.getStore().getStoreId().equals(menuId)) {
+        if (!menu.getStore().getStoreId().equals(storeId)) {
             log.error("Menu with id: {} does not belong to store", menuId);
             throw new IllegalArgumentException("Menu does not belong to the specified store");
         }

@@ -80,13 +80,14 @@ public class MenuController {
     // 메뉴 수정
     @PutMapping(value = "/{menuId}")
     public ResponseEntity<?> updateMenu(
+    		@PathVariable Long storeId,
             @PathVariable Long menuId,
             @RequestPart("menuData") MenuDTO menuDTO,
             @RequestPart(value = "image", required = false) MultipartFile image) {
         try {
         	
             Menu updatedMenu = menuService.updateMenu(
-            		menuDTO.getStoreId(),
+            		storeId,
                     menuId,
                     menuDTO.getName(),
                     menuDTO.getPrice(),
