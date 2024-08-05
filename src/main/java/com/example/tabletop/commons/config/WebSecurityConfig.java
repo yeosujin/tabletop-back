@@ -38,11 +38,16 @@ public class WebSecurityConfig {
                 
                 .authorizeHttpRequests((request) -> request
                 		.requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll() // test
+                		.requestMatchers("/api/sales/*").permitAll()
+                		.requestMatchers("/api/sse/notify/*").permitAll()
                         .requestMatchers("/api/sellers/signup", "/api/sellers/exists").permitAll()
                         .requestMatchers("/api/stores/*/menus", "/api/stores/*", "/api/stores/*/details").permitAll()
-                        .requestMatchers("/api/orders/").permitAll()
+                        .requestMatchers("/api/orders/*").permitAll()
                         .requestMatchers("/api/auth/login", "/api/auth/{loginId}", "/api/auth/token/refresh").permitAll()
                         .requestMatchers("/api/mail/**", "/api/s3/**", "/api/store/**").permitAll()
+                        // 임시방편으로
+                        .requestMatchers("/api/**").permitAll() // 이렇게는 어떠심
+                        
                         .anyRequest().authenticated()
                 )
                 
