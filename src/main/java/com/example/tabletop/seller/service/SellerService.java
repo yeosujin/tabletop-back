@@ -299,4 +299,11 @@ Hibernate:
 			throw new SellerNotFoundException("해당 로그인 ID의 판매자를 찾을 수 없어 계정 삭제에 실패했습니다.");
 		}
 	}
+
+    public Boolean readClickCountSetting(String loginId) {
+		return sellerRepository
+				.findByLoginId(loginId).orElseThrow(() ->
+						new SellerNotFoundException("해당 로그인 ID의 판매자를 찾을 수 없어 계정 삭제에 실패했습니다."))
+				.getDoneClickCountSetting();
+	}
 }

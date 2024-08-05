@@ -62,4 +62,11 @@ public class SellerController {
         sellerService.deleteSeller(loginId);
         return new ResponseEntity<>("판매자 계정이 성공적으로 삭제되었습니다.", HttpStatus.NO_CONTENT);        
     }
+
+    // get doneClickCountSetting
+    @GetMapping("/{loginId}/count-setting")
+    public ResponseEntity<Boolean> readCountSetting(@PathVariable String loginId) throws SellerNotFoundException {
+        return ResponseEntity.ok(sellerService.readClickCountSetting(loginId));
+    }
+
 }
