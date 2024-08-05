@@ -1,11 +1,8 @@
 package com.example.tabletop.store.repository;
 
-import com.example.tabletop.store.entity.Store;
-import com.example.tabletop.store.enums.StoreType;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -15,15 +12,33 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+
+import com.example.tabletop.seller.entity.Seller;
+import com.example.tabletop.seller.repository.SellerRepository;
+import com.example.tabletop.store.entity.Store;
+import com.example.tabletop.store.enums.StoreType;
+
 @DataJpaTest
 class StoreRepositoryTest {
 
     @Autowired
     private StoreRepository storeRepository;
 
+    @Autowired
+    private SellerRepository sellerRepository;
+
     @Test
     void testCRUD() {
         // Create
+        Seller seller = Seller.builder()
+                .loginId("testSeller")
+                .username("Test Seller")
+                .build();
+        sellerRepository.save(seller);
+
         Set<String> holidays = new HashSet<>(List.of("Monday", "Tuesday"));
         Store store = Store.builder()
                 .name("Test Store")
@@ -39,49 +54,60 @@ class StoreRepositoryTest {
                 .holidays(holidays)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
+                .seller(seller)
                 .build();
         Store savedStore = storeRepository.save(store);
-        Assertions.assertNotNull(savedStore);
+        assertNotNull(savedStore);
 
         // Read
         List<Store> stores = storeRepository.findAll();
-        Assertions.assertNotNull(stores);
-        Assertions.assertEquals(1, stores.size());
-        Assertions.assertEquals(store.getName(), stores.get(0).getName());
+        assertNotNull(stores);
+        assertEquals(1, stores.size());
+        assertEquals(store.getName(), stores.get(0).getName());
 
         // Update
         savedStore.updateDetails("Updated Store", "Updated description", "Updated address", "Updated notice", LocalTime.of(10, 0), LocalTime.of(20, 0), new HashSet<>(List.of("Wednesday")));
         Store updatedStore = storeRepository.save(savedStore);
-        Assertions.assertEquals("Updated Store", updatedStore.getName());
-        Assertions.assertEquals("Updated description", updatedStore.getDescription());
-        Assertions.assertEquals("Updated address", updatedStore.getAddress());
-        Assertions.assertEquals("Updated notice", updatedStore.getNotice());
-        Assertions.assertEquals(LocalTime.of(10, 0), updatedStore.getOpenTime());
-        Assertions.assertEquals(LocalTime.of(20, 0), updatedStore.getCloseTime());
-        Assertions.assertEquals(new HashSet<>(List.of("Wednesday")), updatedStore.getHolidays());
+        assertEquals("Updated Store", updatedStore.getName());
+        assertEquals("Updated description", updatedStore.getDescription());
+        assertEquals("Updated address", updatedStore.getAddress());
+        assertEquals("Updated notice", updatedStore.getNotice());
+        assertEquals(LocalTime.of(10, 0), updatedStore.getOpenTime());
+        assertEquals(LocalTime.of(20, 0), updatedStore.getCloseTime());
+        assertEquals(new HashSet<>(List.of("Wednesday")), updatedStore.getHolidays());
 
         // Delete
         storeRepository.deleteById(savedStore.getStoreId());
-        Assertions.assertTrue(storeRepository.findById(savedStore.getStoreId()).isEmpty());
+        assertTrue(storeRepository.findById(savedStore.getStoreId()).isEmpty());
     }
 
     @Test
     void testFindAllBySeller_LoginId() {
         // given
-        String sellerLoginId = "testSeller";
-        Store store1 = Store.builder().name("Store 1").corporateRegistrationNumber("123456789").build();
-        Store store2 = Store.builder().name("Store 2").corporateRegistrationNumber("987654321").build();
-        // Assuming there's a method to set seller's login ID
-        store1.setSellerLoginId(sellerLoginId);
-        store2.setSellerLoginId(sellerLoginId);
+        Seller seller = Seller.builder()
+                .loginId("testSeller")
+                .username("Test Seller")
+                .build();
+        sellerRepository.save(seller);
+
+        Store store1 = Store.builder()
+                .name("Store 1")
+                .corporateRegistrationNumber("123456789")
+                .seller(seller)
+                .build();
+        Store store2 = Store.builder()
+                .name("Store 2")
+                .corporateRegistrationNumber("987654321")
+                .seller(seller)
+                .build();
         storeRepository.saveAll(List.of(store1, store2));
 
         // when
-        List<Store> result = storeRepository.findAllBySeller_LoginId(sellerLoginId);
+        List<Store> result = storeRepository.findAllBySeller_LoginId(seller.getLoginId());
 
         // then
-        Assertions.assertEquals(2, result.size());
-        Assertions.assertTrue(result.stream().allMatch(store -> store.getSellerLoginId().equals(sellerLoginId)));
+        assertEquals(2, result.size());
+        assertTrue(result.stream().allMatch(store -> store.getSeller().getLoginId().equals(seller.getLoginId())));
     }
 
     @Test
@@ -98,7 +124,7 @@ class StoreRepositoryTest {
         boolean exists = storeRepository.existsByCorporateRegistrationNumber(corporateRegistrationNumber);
 
         // then
-        Assertions.assertTrue(exists);
+        assertTrue(exists);
     }
 
     @Test
@@ -115,7 +141,7 @@ class StoreRepositoryTest {
         Optional<Store> result = storeRepository.findById(savedStore.getStoreId());
 
         // then
-        Assertions.assertTrue(result.isPresent());
-        Assertions.assertEquals(savedStore.getName(), result.get().getName());
+        assertTrue(result.isPresent());
+        assertEquals(savedStore.getName(), result.get().getName());
     }
 }

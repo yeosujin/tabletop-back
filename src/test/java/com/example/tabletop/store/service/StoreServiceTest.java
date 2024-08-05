@@ -1,25 +1,36 @@
 package com.example.tabletop.store.service;
 
+import com.example.tabletop.seller.entity.Seller;
+import com.example.tabletop.seller.repository.SellerRepository;
+import com.example.tabletop.store.dto.StoreDetailsDTO;
+import com.example.tabletop.store.dto.StoreListResponseDTO;
 import com.example.tabletop.store.entity.Store;
+import com.example.tabletop.store.enums.StoreType;
 import com.example.tabletop.store.repository.StoreRepository;
-import com.example.tabletop.store.service.StoreService;
-import org.junit.jupiter.api.Assertions;
+import com.example.tabletop.storeimage.entity.StoreImage;
+import com.example.tabletop.storeimage.service.StoreImageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class StoreServiceTest {
 
     @Mock
     private StoreRepository storeRepository;
+
+    @Mock
+    private SellerRepository sellerRepository;
+
+    @Mock
+    private StoreImageService storeImageService;
 
     @InjectMocks
     private StoreService storeService;
@@ -30,89 +41,145 @@ class StoreServiceTest {
     }
 
     @Test
-    void testCreateStore() {
+    void testGetStoreListByLoginId() {
         // given
-        String name = "Test Store";
-        Store store = new Store(null, name);
+    	String loginId = "testUser";
+        Seller seller = Seller.builder().id(1L).loginId(loginId).build();
+        List<Store> stores = Arrays.asList(
+            Store.builder().storeId(1L).name("Store 1").storeType(StoreType.ORDINARY).seller(seller).build(),
+            Store.builder().storeId(2L).name("Store 2").storeType(StoreType.TEMPORARY).seller(seller).build()
+        );
+        when(storeRepository.findAllBySeller_LoginId(loginId)).thenReturn(stores);
 
         // when
-        when(storeRepository.save(any(Store.class))).thenReturn(store);
-        Store savedStore = storeService.createStore(name);
+        List<StoreListResponseDTO> result = storeService.getStoreListByLoginId(loginId);
 
         // then
-        Assertions.assertNotNull(savedStore);
-        Assertions.assertEquals(name, savedStore.getName());
-        verify(storeRepository, times(1)).save(any(Store.class));
+        assertEquals(2, result.size());
+        assertEquals("Store 1", result.get(0).getName());
+        assertEquals(StoreType.ORDINARY, result.get(0).getStoreType());
+        assertEquals("Store 2", result.get(1).getName());
+        assertEquals(StoreType.TEMPORARY, result.get(1).getStoreType());
     }
 
     @Test
-    void testGetAllStores() {
+    void testCheckCorporateRegistrationNumberDuplication() {
         // given
-        List<Store> stores = new ArrayList<>();
-        stores.add(new Store(1L, "Store 1"));
-        stores.add(new Store(2L, "Store 2"));
+        String corporateRegistrationNumber = "123456789";
+        when(storeRepository.existsByCorporateRegistrationNumber(corporateRegistrationNumber)).thenReturn(true);
 
         // when
-        when(storeRepository.findAll()).thenReturn(stores);
-        List<Store> result = storeService.getAllStores();
+        boolean result = storeService.checkCorporateRegistrationNumberDuplication(corporateRegistrationNumber);
 
         // then
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(stores.size(), result.size());
-        for (int i = 0; i < stores.size(); i++) {
-            Assertions.assertEquals(stores.get(i).getId(), result.get(i).getId());
-            Assertions.assertEquals(stores.get(i).getName(), result.get(i).getName());
-        }
-        verify(storeRepository, times(1)).findAll();
+        assertTrue(result);
     }
 
     @Test
-    void testGetStoreById() {
+    void testInsertStore() throws Exception {
+        // given
+        String loginId = "testUser";
+        Seller seller = Seller.builder()
+                .id(1L)
+                .loginId(loginId)
+                .username("Test User")
+                .build();
+        when(sellerRepository.findByLoginId(loginId)).thenReturn(Optional.of(seller));
+
+        Store savedStore = Store.builder().storeId(1L).build();
+        when(storeRepository.saveAndFlush(any(Store.class))).thenReturn(savedStore);
+
+        MultipartFile imageFile = mock(MultipartFile.class);
+        when(imageFile.isEmpty()).thenReturn(false);
+
+        StoreImage storeImage = StoreImage.builder()
+                .filename("uuid_filename.jpg")
+                .fileOriginalName("original_filename.jpg")
+                .filepath("/path/to/image")
+                .S3Url("https://s3-url.com/image.jpg")
+                .build();
+        when(storeImageService.saveImage(eq(1L), any(MultipartFile.class))).thenReturn(storeImage);
+
+        // when
+        storeService.insertStore(loginId, "Test Store", "ORDINARY", "123456789", null, null,
+                "Description", "Address", "Notice", "09:00", "18:00", 
+                new String[]{"Monday"}, imageFile);
+
+        // then
+        verify(storeRepository).saveAndFlush(any(Store.class));
+        verify(storeImageService).saveImage(eq(1L), any(MultipartFile.class));
+    }
+
+    @Test
+    void testGetStoreDetails() {
         // given
         Long storeId = 1L;
-        Store store = new Store(storeId, "Test Store");
-
-        // when
+        Store store = Store.builder()
+                .storeId(storeId)
+                .name("Test Store")
+                .storeType(StoreType.ORDINARY)
+                .build();
+        StoreImage storeImage = StoreImage.builder()
+                .filename("uuid_filename.jpg")
+                .fileOriginalName("original_filename.jpg")
+                .filepath("/path/to/image")
+                .S3Url("https://s3-url.com/image.jpg")
+                .build();
+        store.setStoreImage(storeImage);
         when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
-        Store result = storeService.getStoreById(storeId);
+
+        // when
+        StoreDetailsDTO result = storeService.getStoreDetails(storeId);
 
         // then
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(store.getId(), result.getId());
-        Assertions.assertEquals(store.getName(), result.getName());
-        verify(storeRepository, times(1)).findById(storeId);
+        assertNotNull(result);
+        assertEquals("Test Store", result.getName());
+        assertEquals(StoreType.ORDINARY, result.getStoreType());
+        assertEquals("https://s3-url.com/image.jpg", result.getS3Url());
     }
 
     @Test
-    void testUpdateStore() {
+    void testUpdateStoreByStoreId() throws Exception {
         // given
         Long storeId = 1L;
-        String newName = "Updated Store";
-        Store existingStore = new Store(storeId, "Test Store");
-        Store updatedStore = new Store(storeId, newName);
+        Store store = Store.builder()
+                .storeId(storeId)
+                .name("Old Store")
+                .build();
+        when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+
+        MultipartFile imageFile = mock(MultipartFile.class);
+        when(imageFile.isEmpty()).thenReturn(false);
+
+        StoreImage storeImage = StoreImage.builder()
+                .filename("new_uuid_filename.jpg")
+                .fileOriginalName("new_original_filename.jpg")
+                .filepath("/new/path/to/image")
+                .S3Url("https://new-s3-url.com/image.jpg")
+                .build();
+        when(storeImageService.saveImage(eq(storeId), any(MultipartFile.class))).thenReturn(storeImage);
 
         // when
-        when(storeRepository.findById(storeId)).thenReturn(Optional.of(existingStore));
-        when(storeRepository.save(any(Store.class))).thenReturn(updatedStore);
-        Store result = storeService.updateStore(storeId, newName);
+        storeService.updateStoreByStoreId(storeId, "New Store", "New Description", "New Address",
+                "New Notice", "10:00", "19:00", new String[]{"Sunday"}, imageFile);
 
         // then
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(newName, result.getName());
-        verify(storeRepository, times(1)).findById(storeId);
-        verify(storeRepository, times(1)).save(any(Store.class));
+        verify(storeRepository).save(any(Store.class));
+        verify(storeImageService).saveImage(eq(storeId), any(MultipartFile.class));
     }
 
     @Test
-    void testDeleteStore() {
+    void testDeleteStoreByStoreId() throws Exception {
         // given
         Long storeId = 1L;
+        Store store = Store.builder().storeId(storeId).build();
+        when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
 
         // when
-        doNothing().when(storeRepository).deleteById(storeId);
-        storeService.deleteStore(storeId);
+        storeService.deleteStoreByStoreId(storeId);
 
         // then
-        verify(storeRepository, times(1)).deleteById(storeId);
+        verify(storeImageService).deleteFolderFromS3(storeId);
+        verify(storeRepository).delete(store);
     }
 }

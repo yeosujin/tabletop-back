@@ -1,9 +1,9 @@
 package com.example.tabletop.store.controller;
 
-import com.example.tabletop.store.controller.StoreController;
 import com.example.tabletop.store.entity.Store;
 import com.example.tabletop.store.service.StoreService;
-import com.example.tabletop.store.service.StoreImageService;
+import com.example.tabletop.storeimage.service.StoreImageService;
+import com.example.tabletop.storeimage.entity.StoreImage;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,13 +15,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.util.Arrays;
-
 import static org.mockito.Mockito.*;
 
 @WebMvcTest(StoreController.class)
 class StoreControllerTest {
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -35,35 +32,39 @@ class StoreControllerTest {
     private ObjectMapper objectMapper;
 
     @Test
-    void testUploadStoreImage() throws Exception {
+    void testSaveStoreImage() throws Exception {
         // given
         Long storeId = 1L;
         MockMultipartFile image = new MockMultipartFile("image", "test.jpg", "image/jpeg", new byte[]{});
-
+        StoreImage savedImage = new StoreImage("filename", "test.jpg", "filepath", "s3url");
+        
         // when
-        doNothing().when(storeImageService).uploadStoreImage(storeId, image);
+        when(storeImageService.saveImage(eq(storeId), any(MockMultipartFile.class))).thenReturn(savedImage);
 
         // then
         mockMvc.perform(MockMvcRequestBuilders.multipart("/api/stores/{storeId}/image", storeId)
                         .file(image))
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.filename").value("filename"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.fileOriginalName").value("test.jpg"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.filepath").value("filepath"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.s3Url").value("s3url"));
 
-        verify(storeImageService, times(1)).uploadStoreImage(storeId, image);
+        verify(storeImageService, times(1)).saveImage(eq(storeId), any(MockMultipartFile.class));
     }
 
     @Test
-    void testGetStoreImage() throws Exception {
+    void testDeleteStoreImage() throws Exception {
         // given
-        Long storeId = 1L;
-        byte[] imageBytes = new byte[]{1, 2, 3};
-        when(storeImageService.getStoreImage(storeId)).thenReturn(imageBytes);
+        Long imageId = 1L;
 
         // when
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/stores/{storeId}/image", storeId))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.content().bytes(imageBytes));
+        doNothing().when(storeImageService).deleteImageFromS3(imageId);
 
         // then
-        verify(storeImageService, times(1)).getStoreImage(storeId);
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/stores/image/{imageId}", imageId))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+
+        verify(storeImageService, times(1)).deleteImageFromS3(imageId);
     }
 }
