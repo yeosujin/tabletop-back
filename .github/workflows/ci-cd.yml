@@ -47,7 +47,7 @@ jobs:
 
     steps:
       - name: Excute Remote SSH Commands Using SSH_PRIVATE_KEY
-        uses: appleboy/ssh-action@v0.1.9
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
