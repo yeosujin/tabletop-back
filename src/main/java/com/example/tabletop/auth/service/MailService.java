@@ -64,7 +64,7 @@ public class MailService {
 		log.info("이메일 인증 코드 요청: {}", email);
 		String verificationCode = generator.createCertificationNumber();
         String emailContent = String.format("인증 코드: %s <br><br> 해당 코드를 회원가입 페이지에 입력해주세요.", verificationCode);
-        sendMail(email, "[자리부터Java] 회원가입 이메일 인증 코드", emailContent);
+        sendMail(email, "[TableTop] 회원가입 이메일 인증 코드", emailContent);
         return verificationCode;
     }
 	
@@ -95,7 +95,7 @@ public class MailService {
 			MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "UTF-8");
 			helper.setFrom(from);
 			helper.setTo(email);
-			helper.setSubject("[자리부터Java] 임시 비밀번호 안내");
+			helper.setSubject("[TableTop] 임시 비밀번호 안내");
 			helper.setText(content, true);
 			
 			mailSender.send(mimeMessage);
