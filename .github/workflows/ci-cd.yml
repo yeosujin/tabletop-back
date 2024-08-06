@@ -1,76 +1,61 @@
-name: CI/CD
+name: Backend CI/CD with Docker
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
   pull_request:
-    branches:
-      - main
+    branches: [ "main" ]
 
 jobs:
+  build:
 
-  build-backend:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Set up JDK 17
       uses: actions/setup-java@v3
       with:
         java-version: '17'
-        distribution: 'adopt'
-
+        distribution: 'temurin'
+        cache: maven
+        
     - uses: actions/checkout@v2
     - run: |
         mkdir ./src/main/resources
         touch ./src/main/resources/application.properties
     - run: echo "${{ secrets.APPLICATION_PROPERTIES }}" > ./src/main/resources/application.properties
-    
+
     - name: Build with Maven
       run: mvn -B package --file pom.xml
-      
-  build-and-push-docker:
-    needs: build-backend
-    
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v3
-    
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
 
     - name: Build Docker Image
       run: docker build -t ${{ secrets.DOCKER_USERNAME }}/docker-tabletop-back .
-      
-    - name: Login to Docker Hub
+
+    - name: Docker Hub Login
       uses: docker/login-action@v2
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-        
+
     - name: Docker Hub Push Image
-      run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/docker-tabletop-back
-        
+      run: docker push ${{ secrets.DOCKER_USERNAME }}/docker-tabletop-back
+
   deploy:
-    needs: build-and-push-docker
-    
+    needs: build
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Deploy to production
-      env:
-        HOST: ${{ secrets.HOST }}
-        USERNAME: ${{ secrets.USERNAME }}
-        KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-      run: |
-        echo "$KEY" > private_key.pem
-        chmod 600 private_key.pem
-        ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} << EOF
-          docker pull ${{ secrets.DOCKER_USERNAME }}/docker-tabletop-back:latest
-          docker stop tabletop-back || true
-          docker rm tabletop-back || true
-          docker run -d --name tabletop-back -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/docker-tabletop-back:latest
-        EOF
-        rm -f private_key.pem
+      - name: Excute Remote SSH Commands Using SSH_PRIVATE_KEY
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            docker stop $(docker ps -a -q)
+            docker rm $(docker ps -a -q)
+            docker pull ${{ secrets.DOCKER_USERNAME }}/docker-tabletop-back
+            docker run -d -p 8080:8080 --name tabletop-backend ${{ secrets.DOCKER_USERNAME }}/docker-tabletop-back
+            docker system prune -f
