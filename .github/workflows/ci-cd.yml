@@ -40,6 +40,9 @@ jobs:
     
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
+
+    - name: Build Docker Image
+      run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/docker-tabletop-back .
       
     - name: Login to Docker Hub
       uses: docker/login-action@v2
@@ -47,13 +50,8 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
         
-    - name: Build and push backend
-      uses: docker/build-push-action@v3
-      with:
-        context: .
-        file: ./Dockerfile
-        push: true
-        tags: ${{ secrets.DOCKER_USERNAME }}/docker-tabletop-back:latest
+    - name: Docker Hub Push Image
+      run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/docker-tabletop-back
         
   deploy:
     needs: build-and-push-docker
