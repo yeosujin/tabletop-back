@@ -65,9 +65,14 @@ jobs:
       env:
         HOST: ${{ secrets.HOST }}
         USERNAME: ${{ secrets.USERNAME }}
-        PASSWORD: ${{ secrets.PASSWORD }}
+        KEY: ${{ secrets.SSH_PRIVATE_KEY }}
       run: |
-        ssh $USERNAME@$HOST << EOF
-        docker pull ${{ secrets.DOCKER_USERNAME }}/docker-tabletop-back:latest
-        docker run -d -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/docker-tabletop-back:latest
+        echo "$KEY" > private_key.pem
+        chmod 600 private_key.pem
+        ssh -i private_key.pem -o StrictHostKeyChecking=no $USERNAME@$HOST << EOF
+          docker pull ${{ secrets.DOCKER_USERNAME }}/docker-tabletop-back:latest
+          docker stop tabletop-back || true
+          docker rm tabletop-back || true
+          docker run -d --name tabletop-back -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/docker-tabletop-back:latest
         EOF
+        rm -f private_key.pem
