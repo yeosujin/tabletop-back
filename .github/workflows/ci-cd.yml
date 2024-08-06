@@ -69,7 +69,7 @@ jobs:
       run: |
         echo "$KEY" > private_key.pem
         chmod 600 private_key.pem
-        ssh -i private_key.pem -o StrictHostKeyChecking=no $USERNAME@$HOST << EOF
+        ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} << EOF
           docker pull ${{ secrets.DOCKER_USERNAME }}/docker-tabletop-back:latest
           docker stop tabletop-back || true
           docker rm tabletop-back || true
