@@ -20,8 +20,15 @@ jobs:
       with:
         java-version: '17'
         distribution: 'adopt'
+
+    - uses: actions/checkout@v2
+    - run: |
+        mkdir ./src/main/resources
+        touch ./src/main/resources/application.properties
+    - run: echo "${{ secrets.APPLICATION_PROPERTIES }}" > ./src/main/resources/application.properties
+    
     - name: Build with Maven
-      run: mvn clean install
+      run: mvn -B package --file pom.xml
       
   build-and-push-docker:
     needs: build-backend
