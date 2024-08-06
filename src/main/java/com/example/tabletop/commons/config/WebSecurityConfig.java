@@ -39,7 +39,8 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests((request) -> request
                 		.requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                         .requestMatchers("/api/sellers/signup", "/api/sellers/exists").permitAll()                      
-                        .requestMatchers("/api/auth/**", "/api/mail/**").permitAll()                 
+                        .requestMatchers("/api/auth/**", "/api/mail/**").permitAll()     
+                        .requestMatchers("/api/sse/notify/*", "/api/orders/", "/api/stores/*/details").permitAll()
                         .anyRequest().authenticated()
                 )
                 
