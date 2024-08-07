@@ -33,19 +33,22 @@ public class WebSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
                 .csrf(csrf -> csrf.disable())
-                
+
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                
+
                 .authorizeHttpRequests((request) -> request
                 		.requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                        .requestMatchers("/api/sellers/signup", "/api/sellers/exists").permitAll()                      
-                        .requestMatchers("/api/auth/**", "/api/mail/**").permitAll()     
+                        .requestMatchers("/api/sellers/signup", "/api/sellers/exists").permitAll()
+                        .requestMatchers("/api/auth/**", "/api/mail/**").permitAll()
                         .requestMatchers("/api/sse/notify/*", "/api/orders/", "/api/stores/*/details").permitAll()
+                        .requestMatchers("/consumer/**").permitAll()
+                        .requestMatchers("/api/stores/*/menus").permitAll()
+                        .requestMatchers("/api/orders/").permitAll()
                         .anyRequest().authenticated()
                 )
-                
+
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
-                
+
                 .build();
     }
 
