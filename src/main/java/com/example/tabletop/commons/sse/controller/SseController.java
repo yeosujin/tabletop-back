@@ -4,6 +4,7 @@ import com.example.tabletop.commons.sse.service.SseService;
 import com.example.tabletop.menu.entity.Menu;
 import com.example.tabletop.order.dto.KitchenOrderResponseDto;
 import com.example.tabletop.order.entity.Order;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -27,8 +28,12 @@ public class SseController {
     private final SseService sseService;
 
     @GetMapping(value = "/orders/subscribe/{storeId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ServerSentEvent<KitchenOrderResponseDto>> streamOrders(@PathVariable Long storeId) {
+    public Flux<ServerSentEvent<KitchenOrderResponseDto>> streamOrders(@PathVariable Long storeId, HttpServletResponse response) {
         log.info("SSE connection established for store ID: {}", storeId);
+        response.addHeader("X-Accel-Buffering", "no");
+        response.addHeader("Content-Type", "text/event-stream");
+        response.setHeader("Connection", "keep-alive");
+        response.setHeader("Cache-Control", "no-cache");
         return sseService.getOrderStream(storeId)
                 .map(order -> ServerSentEvent.<KitchenOrderResponseDto>builder()
                         .data(order)
