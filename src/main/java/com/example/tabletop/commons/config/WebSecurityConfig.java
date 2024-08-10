@@ -8,7 +8,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,11 +33,13 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(csrf -> csrf.disable())
+                
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                
                 .authorizeHttpRequests((request) -> request
-                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                        .requestMatchers("/api/sellers/signup", "/api/sellers/exists").permitAll()
+                		.requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+                        .requestMatchers("/api/sellers/signup", "/api/sellers/exists").permitAll()                      
                         .requestMatchers("/api/auth/**", "/api/mail/**").permitAll()
                         .requestMatchers("/api/sse/notify/*", "/api/orders/", "/api/stores/*/details").permitAll()
                         .requestMatchers("/consumer/**").permitAll()
@@ -46,10 +47,13 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/orders/").permitAll()
                         .anyRequest().authenticated()
                 )
+                
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
+                
                 .build();
     }
 
+    // JwtTokenFilter를 특정 URL 패턴에만 적용
     @Bean
     public FilterRegistrationBean<JwtTokenFilter> jwtTokenFilterRegistration(JwtTokenFilter filter) {
         FilterRegistrationBean<JwtTokenFilter> registration = new FilterRegistrationBean<>(filter);
