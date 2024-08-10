@@ -27,9 +27,7 @@ public class OrderController {
 
     @GetMapping("/{storeId}")
     public ResponseEntity<List<KitchenOrderResponseDto>> getAllOrders(@PathVariable Long storeId) {
-        return ResponseEntity.ok(
-          orderService.readKitchenOrders(storeId)
-        );
+        return ResponseEntity.ok(orderService.readKitchenOrders(storeId));
     }
 
     @PutMapping("/{orderId}/cancel")
@@ -42,5 +40,23 @@ public class OrderController {
     public ResponseEntity<Order> completeOrder(@PathVariable Long orderId) {
         Order completedOrder = orderService.updateOrderStatus(orderId, 1);
         return ResponseEntity.ok(completedOrder);
+    }
+
+    @PostMapping("/complete")
+    public ResponseEntity<OrderResponseDto> completeOrderFromMobile(
+            @RequestParam Long storeId,
+            @RequestParam String impUid,
+            @RequestParam String merchantUid) {
+        OrderResponseDto orderResponseDto = orderService.createOrderFromPayment(storeId, impUid, merchantUid);
+        return ResponseEntity.status(HttpStatus.CREATED).body(orderResponseDto);
+    }
+
+    @GetMapping("/payment")
+    public ResponseEntity<OrderResponseDto> getOrderByPayment(
+            @RequestParam Long storeId,
+            @RequestParam String impUid,
+            @RequestParam String merchantUid) {
+        OrderResponseDto orderResponseDto = orderService.getOrderByPayment(storeId, impUid, merchantUid);
+        return ResponseEntity.ok(orderResponseDto);
     }
 }
