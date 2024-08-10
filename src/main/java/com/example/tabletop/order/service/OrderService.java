@@ -14,11 +14,9 @@ import com.example.tabletop.orderitem.entity.Orderitem;
 import com.example.tabletop.orderitem.repository.OrderitemRepository;
 import com.example.tabletop.payment.dto.PaymentRequestDto;
 import com.example.tabletop.payment.dto.PaymentResponseDto;
-import com.example.tabletop.payment.dto.response.PaymentVerificationDto;
 import com.example.tabletop.payment.entity.Payment;
 import com.example.tabletop.payment.enums.PaymentMethod;
 import com.example.tabletop.payment.repository.PaymentRepository;
-import com.example.tabletop.payment.service.PaymentService;
 import com.example.tabletop.store.entity.Store;
 import com.example.tabletop.store.repository.StoreRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -28,7 +26,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Sinks;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -43,10 +40,8 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final StoreRepository storeRepository;
     private final MenuRepository menuRepository;
-    private final PaymentRepository paymentRepository;
     private final OrderitemRepository orderItemRepository;
-    private final PaymentService paymentService;
-    private final SseService sseService;
+    private final PaymentRepository paymentRepository;
 
     @Transactional
     public OrderResponseDto createOrder(CreateOrderRequest orderRequestDto) {
@@ -60,42 +55,25 @@ public class OrderService {
         order.setUpdatedAt(LocalDateTime.now());
         order.setStatus(0); // Assuming 0 is the initial status
 
-        BigDecimal totalPrice = calculateTotalPrice(orderRequestDto.getOrderItems());
-        order.setTotalPrice(totalPrice.intValue());
+        int totalPrice = 0;
+        for (OrderItemRequestDto itemDto : orderRequestDto.getOrderItems()) {
+            totalPrice += itemDto.getPrice() * itemDto.getQuantity();
+        }
+        order.setTotalPrice(totalPrice);
 
         int waitingNumber = orderRepository.countTodayOrdersByStoreId(store.getStoreId()) + 1;
         order.setWaitingNumber(waitingNumber);
 
         Order savedOrder = orderRepository.save(order);
 
-        List<Orderitem> orderItems = createOrderItems(savedOrder, orderRequestDto.getOrderItems());
-
-        // Verify payment
-        PaymentVerificationDto verificationDto = paymentService.verifyPayment(orderRequestDto.getPayment().getTransactionId(), totalPrice);
-        paymentService.createPayment(verificationDto, savedOrder);
-
-        // Notify kitchen
-        KitchenOrderResponseDto kitchenOrderResponseDto = createKitchenOrderResponseDto(savedOrder, orderItems);
-        sseService.notifyNewOrder(store.getStoreId(), kitchenOrderResponseDto).subscribe();
-
-        return createOrderResponseDto(savedOrder, orderItems);
-    }
-
-    private BigDecimal calculateTotalPrice(List<OrderItemRequestDto> orderItems) {
-        return orderItems.stream()
-                .map(item -> BigDecimal.valueOf(item.getPrice()).multiply(BigDecimal.valueOf(item.getQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    private List<Orderitem> createOrderItems(Order order, List<OrderItemRequestDto> orderItemDtos) {
         List<Orderitem> orderItems = new ArrayList<>();
 
-        for (OrderItemRequestDto itemDto : orderItemDtos) {
+        for (OrderItemRequestDto itemDto : orderRequestDto.getOrderItems()) {
             Menu menu = menuRepository.findById(itemDto.getMenuId())
                     .orElseThrow(() -> new EntityNotFoundException("Menu not found"));
 
             Orderitem orderItem = new Orderitem();
-            orderItem.setOrder(order);
+            orderItem.setOrder(savedOrder);
             orderItem.setMenu(menu);
             orderItem.setQuantity(itemDto.getQuantity());
             orderItem.setPrice(itemDto.getPrice());
@@ -103,34 +81,33 @@ public class OrderService {
             orderItems.add(orderItemRepository.save(orderItem));
         }
 
-        return orderItems;
+        createPayment(orderRequestDto.getPayment(), savedOrder, BigDecimal.valueOf(totalPrice));
+
+    return new OrderResponseDto(
+        savedOrder.getOrderId(),
+        savedOrder.getWaitingNumber(),
+        savedOrder.getTotalPrice(),
+        orderItems.stream()
+            .map(
+                item ->
+                    new OrderItemResponseDto(
+                        item.getMenu().getName(), item.getQuantity(), item.getPrice()))
+            .toList(),
+        savedOrder.getCreatedAt(),
+        savedOrder.getStatus());
     }
 
-    private OrderResponseDto createOrderResponseDto(Order order, List<Orderitem> orderItems) {
-        return new OrderResponseDto(
-                order.getOrderId(),
-                order.getWaitingNumber(),
-                order.getTotalPrice(),
-                orderItems.stream()
-                        .map(item -> new OrderItemResponseDto(
-                                item.getMenu().getName(), item.getQuantity(), item.getPrice()))
-                        .toList(),
-                order.getCreatedAt(),
-                order.getStatus());
-    }
+    private void createPayment(PaymentRequestDto paymentRequestDto, Order order, BigDecimal amount) {
+        Payment payment = new Payment();
+        payment.setPaymentMethod(PaymentMethod.valueOf(paymentRequestDto.getPaymentMethod().toUpperCase()));
+        payment.setOrder(order);
+        payment.setAmount(amount);
+        payment.setIsRefunded(false);
+        payment.setTransactionId(paymentRequestDto.getTransactionId());
+        payment.setCreatedAt(LocalDateTime.now());
+        payment.setUpdatedAt(LocalDateTime.now());
 
-    private KitchenOrderResponseDto createKitchenOrderResponseDto(Order order, List<Orderitem> orderItems) {
-        return new KitchenOrderResponseDto(
-                order.getOrderId(),
-                order.getWaitingNumber(),
-                order.getTotalPrice(),
-                orderItems.stream()
-                        .map(item -> new KitchenOrderResponseDto.KitchenOrderItemDto(
-                                item.getMenu().getName(), item.getQuantity(), item.getPrice()))
-                        .toList(),
-                order.getCreatedAt(),
-                order.getStatus(),
-                order.getPayment().getTransactionId());
+         paymentRepository.save(payment);
     }
 
     public List<KitchenOrderResponseDto> readKitchenOrders(Long storeId) {
