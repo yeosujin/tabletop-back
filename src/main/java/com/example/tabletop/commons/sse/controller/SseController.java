@@ -31,9 +31,6 @@ public class SseController {
     public Flux<ServerSentEvent<KitchenOrderResponseDto>> streamOrders(@PathVariable Long storeId) {
         log.info("SSE connection attempt for store ID: {}", storeId);
         return sseService.getOrderStream(storeId)
-                .map(order -> ServerSentEvent.<KitchenOrderResponseDto>builder()
-                        .data(order)
-                        .build())
                 .doOnNext(sse -> log.info("Sending order to store ID: {}, Order: {}", storeId, sse.data()))
                 .doOnComplete(() -> log.info("SSE stream completed for store ID: {}", storeId))
                 .doOnError(error -> log.error("Error in SSE stream for store ID: {}", storeId, error));
@@ -51,14 +48,13 @@ public class SseController {
     }
 
     @PostMapping(value = "/notify/{storeId}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> notifyNewOrder(@PathVariable Long storeId, @RequestBody KitchenOrderResponseDto order) {
+    public Mono<ResponseEntity<String>> notifyNewOrder(@PathVariable Long storeId, @RequestBody KitchenOrderResponseDto order) {
         log.info("Notifying new order for store ID: {}, Order: {}", storeId, order);
-        try {
-            sseService.notifyNewOrder(storeId, order);
-            return ResponseEntity.ok("New order notified successfully");
-        } catch (Exception e) {
-            log.error("Failed to notify new order for store ID: {}", storeId, e);
-            return ResponseEntity.internalServerError().body("Failed to notify new order: " + e.getMessage());
-        }
+        return sseService.notifyNewOrder(storeId, order)
+                .then(Mono.just(ResponseEntity.ok("New order notified successfully")))
+                .onErrorResume(e -> {
+                    log.error("Failed to notify new order for store ID: {}", storeId, e);
+                    return Mono.just(ResponseEntity.internalServerError().body("Failed to notify new order: " + e.getMessage()));
+                });
     }
 }
