@@ -5,11 +5,13 @@ import com.example.tabletop.order.dto.KitchenOrderResponseDto;
 import com.example.tabletop.order.dto.OrderResponseDto;
 import com.example.tabletop.order.entity.Order;
 import com.example.tabletop.order.service.OrderService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 
@@ -20,9 +22,15 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping("/")
-    public ResponseEntity<OrderResponseDto> createOrder(@RequestBody CreateOrderRequest orderRequestDto) {
-        OrderResponseDto orderResponseDto = orderService.createOrder(orderRequestDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(orderResponseDto);
+    public ResponseEntity<?> createOrder(@RequestBody CreateOrderRequest orderRequestDto) {
+        try {
+            OrderResponseDto orderResponseDto = orderService.createOrder(orderRequestDto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(orderResponseDto);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
     @GetMapping("/{storeId}")
