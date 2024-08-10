@@ -35,7 +35,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 		String path = request.getServletPath();
 
 		// 익명 접근이 허용된 경로 목록
-		List<String> permitAllPaths = List.of("/api/sse/notify/");
+		List<String> permitAllPaths = List.of("/api/sse/notify/*");
 
 		if (permitAllPaths.stream().anyMatch(path::startsWith)) {
 			filterChain.doFilter(request, response);
