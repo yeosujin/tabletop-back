@@ -34,7 +34,7 @@ public class WebSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
                 .csrf(csrf -> csrf.disable())
-                
+
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 
                 .authorizeHttpRequests((request) -> request
@@ -44,7 +44,6 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/sse/notify/*", "/api/orders/", "/api/stores/*/details").permitAll()
                         .requestMatchers("/consumer/**").permitAll()
                         .requestMatchers("/api/stores/*/menus").permitAll()
-                        .requestMatchers("/api/orders/").permitAll()
                         .anyRequest().authenticated()
                 )
                 
