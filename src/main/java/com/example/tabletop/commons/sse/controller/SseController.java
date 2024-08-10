@@ -51,16 +51,14 @@ public class SseController {
     }
 
     @PostMapping(value = "/notify/{storeId}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<String>> notifyNewOrder(@PathVariable Long storeId, @RequestBody KitchenOrderResponseDto order) {
+    public ResponseEntity<String> notifyNewOrder(@PathVariable Long storeId, @RequestBody KitchenOrderResponseDto order) {
         log.info("Notifying new order for store ID: {}, Order: {}", storeId, order);
-        return sseService.notifyNewOrder(storeId, order)
-                .then(Mono.fromCallable(() -> {
-                    log.info("New order notified successfully for store ID: {}", storeId);
-                    return ResponseEntity.ok("New order notified successfully");
-                }))
-                .onErrorResume(e -> {
-                    log.error("Failed to notify new order for store ID: {}", storeId, e);
-                    return Mono.just(ResponseEntity.internalServerError().body("Failed to notify new order"));
-                });
+        try {
+            sseService.notifyNewOrder(storeId, order);
+            return ResponseEntity.ok("New order notified successfully");
+        } catch (Exception e) {
+            log.error("Failed to notify new order for store ID: {}", storeId, e);
+            return ResponseEntity.internalServerError().body("Failed to notify new order: " + e.getMessage());
+        }
     }
 }
