@@ -28,41 +28,37 @@ public class SseController {
     private final SseService sseService;
 
     @GetMapping(value = "/orders/subscribe/{storeId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ServerSentEvent<KitchenOrderResponseDto>> streamOrders(@PathVariable Long storeId, HttpServletResponse response) {
+    public Flux<ServerSentEvent<KitchenOrderResponseDto>> streamOrders(@PathVariable Long storeId) {
         log.info("SSE connection attempt for store ID: {}", storeId);
-        response.setContentType(MediaType.TEXT_EVENT_STREAM_VALUE);
-        response.setCharacterEncoding("UTF-8");
-        response.setHeader("Cache-Control", "no-cache");
-        response.setHeader("Connection", "keep-alive");
-        response.setHeader("X-Accel-Buffering", "no");
-        log.info("Headers set for SSE connection, store ID: {}", storeId);
-
         return sseService.getOrderStream(storeId)
-                .doOnNext(order -> log.info("Sending order to store ID: {}, Order: {}", storeId, order))
                 .map(order -> ServerSentEvent.<KitchenOrderResponseDto>builder()
                         .data(order)
                         .build())
+                .doOnNext(sse -> log.info("Sending order to store ID: {}, Order: {}", storeId, sse.data()))
                 .doOnComplete(() -> log.info("SSE stream completed for store ID: {}", storeId))
                 .doOnError(error -> log.error("Error in SSE stream for store ID: {}", storeId, error));
     }
 
-
-    @GetMapping(value = "/orders/unsubscribe/{storeId}")
-    public void unsubscribe(@PathVariable Long storeId) {
-        sseService.removeOrderStream(storeId);
+    @GetMapping("/orders/unsubscribe/{storeId}")
+    public Mono<ResponseEntity<String>> unsubscribe(@PathVariable Long storeId) {
+        return sseService.removeOrderStream(storeId)
+                .then(Mono.just(ResponseEntity.ok("Unsubscribed successfully")))
+                .doOnSuccess(result -> log.info("Unsubscribed store ID: {}", storeId))
+                .onErrorResume(e -> {
+                    log.error("Failed to unsubscribe store ID: {}", storeId, e);
+                    return Mono.just(ResponseEntity.internalServerError().body("Failed to unsubscribe"));
+                });
     }
 
     @PostMapping("/notify/{storeId}")
     public Mono<ResponseEntity<String>> notifyNewOrder(@PathVariable Long storeId, @RequestBody KitchenOrderResponseDto order) {
-        log.info("Notifying new order for store ID: {}", storeId);
+        log.info("Notifying new order for store ID: {}, Order: {}", storeId, order);
         return sseService.notifyNewOrder(storeId, order)
-                .map(result -> {
-                    log.info("New order notified successfully for store ID: {}", storeId);
-                    return ResponseEntity.ok("New order notified successfully");
-                })
+                .then(Mono.just(ResponseEntity.ok("New order notified successfully")))
+                .doOnSuccess(result -> log.info("New order notified successfully for store ID: {}", storeId))
                 .onErrorResume(e -> {
                     log.error("Failed to notify new order for store ID: {}", storeId, e);
-                    return Mono.just(ResponseEntity.internalServerError().body("Failed to notify new order"));
+                    return Mono.just(ResponseEntity.internalServerError().body("Failed to notify new order: " + e.getMessage()));
                 });
     }
 }
