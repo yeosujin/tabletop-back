@@ -1,6 +1,7 @@
 package com.example.tabletop.commons.filter;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,17 +33,22 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException, TokenException {
 		String path = request.getServletPath();
-		if(path.equals("/api/auth/token/refresh")) {
-            filterChain.doFilter(request, response);
-            return;
-        } else {
-        	String accessToken = getTokenFromRequest(request);
-    		if (accessToken != null && jwtTokenProvider.validateToken(accessToken)) {
-    			UsernamePasswordAuthenticationToken authentication = getAuthenticationFromToken(accessToken);
-    			authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-    			SecurityContextHolder.getContext().setAuthentication(authentication);
-    		}
-        }
+
+		// 익명 접근이 허용된 경로 목록
+		List<String> permitAllPaths = List.of("/api/sse/notify/");
+
+		if (permitAllPaths.stream().anyMatch(path::startsWith)) {
+			filterChain.doFilter(request, response);
+			return;
+		}
+
+		String accessToken = getTokenFromRequest(request);
+		if (accessToken != null && jwtTokenProvider.validateToken(accessToken)) {
+			UsernamePasswordAuthenticationToken authentication = getAuthenticationFromToken(accessToken);
+			authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+			SecurityContextHolder.getContext().setAuthentication(authentication);
+		}
+
 		filterChain.doFilter(request, response);
 	}
 
