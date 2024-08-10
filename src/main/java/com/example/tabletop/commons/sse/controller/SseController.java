@@ -29,16 +29,21 @@ public class SseController {
 
     @GetMapping(value = "/orders/subscribe/{storeId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ServerSentEvent<KitchenOrderResponseDto>> streamOrders(@PathVariable Long storeId, HttpServletResponse response) {
-        log.info("SSE connection established for store ID: {}", storeId);
+        log.info("SSE connection attempt for store ID: {}", storeId);
         response.addHeader("X-Accel-Buffering", "no");
         response.addHeader("Content-Type", "text/event-stream");
         response.setHeader("Connection", "keep-alive");
         response.setHeader("Cache-Control", "no-cache");
+        log.info("Headers set for SSE connection, store ID: {}", storeId);
         return sseService.getOrderStream(storeId)
+                .doOnNext(order -> log.info("Sending order to store ID: {}, Order: {}", storeId, order))
                 .map(order -> ServerSentEvent.<KitchenOrderResponseDto>builder()
                         .data(order)
-                        .build());
+                        .build())
+                .doOnComplete(() -> log.info("SSE stream completed for store ID: {}", storeId))
+                .doOnError(error -> log.error("Error in SSE stream for store ID: {}", storeId, error));
     }
+
 
     @GetMapping(value = "/orders/unsubscribe/{storeId}")
     public void unsubscribe(@PathVariable Long storeId) {
