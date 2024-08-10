@@ -30,11 +30,13 @@ public class SseController {
     @GetMapping(value = "/orders/subscribe/{storeId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ServerSentEvent<KitchenOrderResponseDto>> streamOrders(@PathVariable Long storeId, HttpServletResponse response) {
         log.info("SSE connection attempt for store ID: {}", storeId);
-        response.addHeader("X-Accel-Buffering", "no");
-        response.addHeader("Content-Type", "text/event-stream");
-        response.setHeader("Connection", "keep-alive");
+        response.setContentType(MediaType.TEXT_EVENT_STREAM_VALUE);
+        response.setCharacterEncoding("UTF-8");
         response.setHeader("Cache-Control", "no-cache");
+        response.setHeader("Connection", "keep-alive");
+        response.setHeader("X-Accel-Buffering", "no");
         log.info("Headers set for SSE connection, store ID: {}", storeId);
+
         return sseService.getOrderStream(storeId)
                 .doOnNext(order -> log.info("Sending order to store ID: {}, Order: {}", storeId, order))
                 .map(order -> ServerSentEvent.<KitchenOrderResponseDto>builder()
