@@ -60,34 +60,30 @@ public class StoreImageService {
         	
             String filename = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
                         
-            // S3 URL 생성 시 Object Lambda 액세스 포인트 URL 사용
-            String s3ObjectLambdaUrl = "https://remove-tmp-prefix-ac-shyz6pn36uujbkcih9sdn6whapn2a--ol-s3.s3-object-lambda.ap-northeast-2.amazonaws.com";
-            String s3Key = S3_NAME + "/" + STORE_DIR_NAME + "/" + filename;
-            
             StoreImage imageEntity = StoreImage.builder()
-                    .filename(filename)
-                    .fileOriginalName(file.getOriginalFilename())
-                    .filepath(saveDir)
-                    .S3Url(s3ObjectLambdaUrl + "/" + s3Key) 
-                    .build();
+					.filename(filename)
+					.fileOriginalName(file.getOriginalFilename())
+					.filepath(saveDir)
+					.S3Url(STORE_DIR_NAME + "/" + filename) 
+					.build();
             
             System.out.println(imageEntity.getFilepath());
             System.out.println(imageEntity.getS3Url());
            
             StoreImage savedImageEntity = storeImageRepository.save(imageEntity);
-            if(savedImageEntity.getStoreImageId() != null) {
-                log.info("Saving image to S3");
-                File uploadFile = new File(imageEntity.getFilepath() + "\\" + imageEntity.getFilename());
-                file.transferTo(uploadFile);
-                
-                System.out.println("Uploading file: " + uploadFile.getName());
-                amazonS3.putObject(new PutObjectRequest(bucketName, s3Key, uploadFile)
+    		if(savedImageEntity.getStoreImageId() != null) {
+    			log.info("Saving image to S3");
+				File uploadFile = new File(imageEntity.getFilepath() + "\\" + imageEntity.getFilename());
+				file.transferTo(uploadFile);
+				
+				System.out.println("Uploading file: " + uploadFile.getName());
+				amazonS3.putObject(new PutObjectRequest(bucketName, S3_NAME + "/" + STORE_DIR_NAME + "/" + uploadFile.getName(), uploadFile)
                       .withCannedAcl(CannedAccessControlList.PublicRead));
-                
-                if(uploadFile.exists()) {
-                    uploadFile.delete();
-                }
-            }
+				
+				if(uploadFile.exists()) {
+					uploadFile.delete();
+				}
+    		}
     			
             return savedImageEntity;
         } catch (IOException e) {
