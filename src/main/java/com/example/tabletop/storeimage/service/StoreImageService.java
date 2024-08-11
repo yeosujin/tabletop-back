@@ -68,12 +68,13 @@ public class StoreImageService {
                     .filename(filename)
                     .fileOriginalName(file.getOriginalFilename())
                     .filepath(saveDir)
-                    .S3Url(s3Key) 
+                    .S3Url(STORE_DIR_NAME + "/" + filename)
                     .build();
            
             StoreImage savedImageEntity = storeImageRepository.save(imageEntity);
             if(savedImageEntity.getStoreImageId() != null) {
                 log.info("Saving image to S3");
+                
                 File uploadFile = new File(imageEntity.getFilepath() + "\\" + imageEntity.getFilename());
                 file.transferTo(uploadFile);
 
