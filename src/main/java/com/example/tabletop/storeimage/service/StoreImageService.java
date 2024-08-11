@@ -60,7 +60,7 @@ public class StoreImageService {
         	
             String filename = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
                         
-         // S3 URL 생성 시 Object Lambda 액세스 포인트 URL 사용
+            // S3 URL 생성 시 Object Lambda 액세스 포인트 URL 사용
             String s3ObjectLambdaUrl = "https://remove-tmp-prefix-ac-shyz6pn36uujbkcih9sdn6whapn2a--ol-s3.s3-object-lambda.ap-northeast-2.amazonaws.com";
             String s3Key = S3_NAME + "/" + STORE_DIR_NAME + "/" + filename;
             

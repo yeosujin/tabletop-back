@@ -59,13 +59,17 @@ public class MenuImageService {
         	
             String filename = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
                         
+         // S3 URL 생성 시 Object Lambda 액세스 포인트 URL 사용
+            String s3ObjectLambdaUrl = "https://remove-tmp-prefix-ac-shyz6pn36uujbkcih9sdn6whapn2a--ol-s3.s3-object-lambda.ap-northeast-2.amazonaws.com";
+            String s3Key = S3_NAME + "/" + MENU_DIR_NAME + "/" + filename;
+            
             MenuImage imageEntity = MenuImage.builder()
 					.menuId(menuId)
 					.filename(filename)
-					.fileOriginalName(file.getOriginalFilename())
-					.filepath("C:\\tabletop")
-					.S3Url("https://tabletop-tabletop.s3.ap-northeast-2.amazonaws.com/" + S3_NAME + "/menu/" + MENU_DIR_NAME + "/" + filename) 
-					.build();
+                    .fileOriginalName(file.getOriginalFilename())
+                    .filepath(saveDir)
+                    .S3Url(MENU_DIR_NAME + "/" + filename)
+                    .build();
 
             Long savedImageId = menuImageRepository.save(imageEntity).getMenuImageId();
     		if(savedImageId != null) {
@@ -73,16 +77,16 @@ public class MenuImageService {
     			
     			menu.setMenuImage(imageEntity);
     			
-				File uploadFile = new File(imageEntity.getFilepath() + "\\" + imageEntity.getFilename());
-				file.transferTo(uploadFile);
-				
-				amazonS3.putObject(new PutObjectRequest(bucketName, S3_NAME + "/menu/" + MENU_DIR_NAME + "/" + uploadFile.getName(), uploadFile)
+                File uploadFile = new File(imageEntity.getFilepath() + "\\" + imageEntity.getFilename());
+                file.transferTo(uploadFile);
+
+                amazonS3.putObject(new PutObjectRequest(bucketName, s3Key, uploadFile)
                       .withCannedAcl(CannedAccessControlList.PublicRead));
-				
-				if(uploadFile.exists()) {
-					uploadFile.delete();
-				}
-    		}
+                
+                if(uploadFile.exists()) {
+                    uploadFile.delete();
+                }
+            }
     			
             return imageEntity;
         } catch (IOException e) {
