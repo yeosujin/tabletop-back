@@ -38,7 +38,7 @@ public class MenuImageService {
 	@Value("${cloud.aws.s3.bucket}")	
   	String bucketName;
 	
-	private final String S3_NAME = "tabletop";
+	private final String S3_NAME = "tabletop/menu";
 	private String MENU_DIR_NAME = null;
 	
 	private final AmazonS3 amazonS3;
