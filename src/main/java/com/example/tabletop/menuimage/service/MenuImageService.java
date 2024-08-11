@@ -59,6 +59,8 @@ public class MenuImageService {
         	
             String filename = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
                         
+            String s3Key = S3_NAME + "/" + MENU_DIR_NAME + "/" + filename;
+            
             MenuImage imageEntity = MenuImage.builder()
 					.menuId(menuId)
 					.filename(filename)
@@ -76,7 +78,7 @@ public class MenuImageService {
 				File uploadFile = new File(imageEntity.getFilepath() + "\\" + imageEntity.getFilename());
 				file.transferTo(uploadFile);
 				
-				amazonS3.putObject(new PutObjectRequest(bucketName, S3_NAME + "/menu/" + MENU_DIR_NAME + "/" + uploadFile.getName(), uploadFile)
+				amazonS3.putObject(new PutObjectRequest(bucketName, s3Key, uploadFile)
                       .withCannedAcl(CannedAccessControlList.PublicRead));
 				
 				if(uploadFile.exists()) {
