@@ -73,6 +73,7 @@ public class StoreImageService {
 				File uploadFile = new File(imageEntity.getFilepath() + "\\" + imageEntity.getFilename());
 				file.transferTo(uploadFile);
 				
+				System.out.println("Uploading file: " + uploadFile.getName());
 				amazonS3.putObject(new PutObjectRequest(bucketName, S3_NAME + "/" + STORE_DIR_NAME + "/" + uploadFile.getName(), uploadFile)
                       .withCannedAcl(CannedAccessControlList.PublicRead));
 				
