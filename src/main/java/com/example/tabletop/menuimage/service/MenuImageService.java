@@ -63,7 +63,7 @@ public class MenuImageService {
 					.menuId(menuId)
 					.filename(filename)
 					.fileOriginalName(file.getOriginalFilename())
-					.filepath("C:\\tabletop")
+					.filepath(saveDir)
 					.S3Url("https://tabletop-tabletop.s3.ap-northeast-2.amazonaws.com/" + S3_NAME + "/menu/" + MENU_DIR_NAME + "/" + filename) 
 					.build();
 
